@@ -1,0 +1,181 @@
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.hp {
+  display: flex;
+  position: absolute;
+  top: 3rem;
+  left: 3rem;
+}
+
+.heart {
+  position: relative;
+  background: url('sprite_ui.png') 0px 0px;
+  background-size: 128px;
+  width: 64px;
+  height: 64px;
+}
+
+.rubies {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  bottom: 3rem;
+  left: 3rem;
+}
+
+.icon {
+  position: relative;
+  background: url('sprite_ui.png')-60px -64px;
+  width: 64px;
+  height: 64px;
+}
+
+.value {
+  position: relative;
+  font-size: 3.5rem;
+  color: white;
+  font-family: math;
+}
+
+.h8 .p3 {
+  animation: blink 1s infinite;
+}
+
+.h7 .p3 {
+  animation: blink 1s infinite;
+  background-position: -64px 0px;
+}
+
+.h6 .p2 {
+  animation: blink 1s infinite;
+}
+.h6 .p3 {
+  background-position: 0px -64px;
+}
+
+.h5 .p2 {
+  animation: blink 1s infinite;
+  background-position: -64px 0px;
+}
+.h5 .p3 {
+  background-position: 0px -64px;
+}
+
+.h4 .p1 {
+  animation: blink 1s infinite;
+}
+.h4 .p3 {
+  background-position: 0px -64px;
+}
+.h4 .p2 {
+  background-position: 0px -64px;
+}
+
+.h3 .p1 {
+  animation: blink 1s infinite;
+  background-position: -64px 0px;
+}
+.h3 .p3 {
+  background-position: 0px -64px;
+}
+.h3 .p2 {
+  background-position: 0px -64px;
+}
+
+.h2 .p0 {
+  animation: blink 1s infinite;
+}
+.h2 .p3 {
+  background-position: 0px -64px;
+}
+.h2 .p2 {
+  background-position: 0px -64px;
+}
+.h2 .p1 {
+  background-position: 0px -64px;
+}
+
+.h1 .p0 {
+  animation: blink 1s infinite;
+  background-position: -64px 0px;
+}
+.h1 .p3 {
+  background-position: 0px -64px;
+}
+.h1 .p2 {
+  background-position: 0px -64px;
+}
+.h1 .p1 {
+  background-position: 0px -64px;
+}
+
+.h0 .heart {
+  background-position: 0px -64px;
+}
+
+@keyframes blink {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.menu {
+  display: flex;
+  position: absolute;
+  justify-content: flex-start;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  top: 0;
+  right: 0;
+  width: 35rem;
+  height: 100%;
+  padding: 3rem 3rem 3rem 7rem;
+  background: linear-gradient(
+    90deg,
+    rgba(221, 162, 37, 0) 0%,
+    rgb(50 79 52 / 77%) 36%
+  );
+  color: white;
+}
+
+.menu.hide {
+  display: none;
+}
+
+.title {
+  font-size: 4rem;
+  margin-bottom: 2rem;
+}
+
+.desc {
+  font-size: 1.5rem;
+  margin-bottom: 4rem;
+  white-space: pre;
+  text-wrap: wrap;
+  text-align: end;
+}
+
+.button {
+  padding: 1rem 5rem;
+  margin-bottom: 2rem;
+  background-color: #2054b8;
+  border-radius: 1rem;
+  font-size: 2rem;
+  border: solid;
+  cursor: pointer;
+}
+
+.button:last-child {
+  background: #d44c1e;
+}
