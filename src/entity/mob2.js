@@ -1,14 +1,24 @@
-import {Vector3, LoopOnce} from 'three'
+import { Vector3 } from 'three'
 import Ai from '../control/control_ai'
 import Particles from '../effect/particles'
 import Entity from './entity'
 import Mob1 from './mob1'
-import {getGap, inHitBox, castShadowRecursive, getDistance} from '../function/function'
+import {
+  getGap,
+  inHitBox,
+  castShadowRecursive,
+  getDistance
+} from '../function/function'
+
+const ATTACK = 1
+const JUMP = 2
+const DEAD = 3
+const HIT = 4
+const IDLE = 5
 
 export default class Mob2 extends Entity {
-
   static instances = Mob1.instances
-  static hitAngle = Math.PI/2
+  static hitAngle = Math.PI / 2
   static hitDistance = 1.8
   static velocity = 0.4
   static hearing = 0.5
@@ -18,7 +28,7 @@ export default class Mob2 extends Entity {
     super(mesh, origin, physic)
     this.ctrl = new Ai(2, origin, 0.5)
     this.initVisual(mesh)
-    this.initAnimation(mesh)
+    this.initAnimations()
     this.initSounds()
     this.hp = 5
     this.distance = 999
@@ -33,129 +43,120 @@ export default class Mob2 extends Entity {
   }
 
   update(dt, Player) {
-    super.update(dt)
-    if(this.isBusy()) return
-    this.ctrl.compute(dt, Player, this.position)
-    this.positionVel.x = this.ctrl.axis.x*Mob2.velocity
-    this.positionVel.y = this.ctrl.axis.y*Mob2.velocity
-    this.rotationVel = getGap(this.ctrl.angle, this.rotation.y)*dt*2
-    if(this.ctrl.attack) {
-      this.updateClipAttack(Player)
-    } else {
-      this.updateClipMove()
+    if (!this.isBusy) {
+      this.ctrl.compute(dt, Player, this.position)
+      this.positionVel.x = this.ctrl.axis.x * Mob2.velocity
+      this.positionVel.y = this.ctrl.axis.y * Mob2.velocity
+      this.rotationVel = getGap(this.ctrl.angle, this.rotation.y) * dt * 2
+      if (this.ctrl.attack) {
+        this.updateClipAttack(Player)
+      } else {
+        this.updateClipMove()
+      }
     }
     this.updateDistance(Player)
+    super.update(dt)
   }
 
   updateClipAttack(Player) {
     const player = Player.instances[0]
-    if(!player) return
-    if(this.isAttack()) return
-    this.positionVel.x = 3*Math.cos(this.rotation.y-Math.PI/2)
-    this.positionVel.y = -3*Math.sin(this.rotation.y-Math.PI/2)
-    this.playClip('attack')
-    this.playSound('jump')
-    this.onClipHalf(()=> {
-      if(inHitBox(this, player )) {
+    if (!player) return
+    if (this.isAnim(ATTACK)) return
+    console.log('updateClipAttack')
+    this.positionVel.x = 3 * Math.cos(this.rotation.y - Math.PI / 2)
+    this.positionVel.y = -3 * Math.sin(this.rotation.y - Math.PI / 2)
+    this.anim(ATTACK)
+    this.sound(JUMP)
+    this.onAnimHalf(() => {
+      if (inHitBox(this, player)) {
         player.hit(this, 0.5)
       }
     })
-    this.onClipEnd(()=> {
+    this.onAnimEnd(() => {
       this.positionVel.x = 0
       this.positionVel.y = 0
     })
   }
 
   updateClipMove() {
-    if(this.positionVel.length()!==0 )  {
-      if(!this.isClip('jump')) {
-        this.playClip('jump')
-        this.onClipHalf(()=> {
-          this.playSound('jump').volume = Math.min(Mob2.hearing/this.distance,1)
+    if (this.positionVel.length() !== 0) {
+      if (!this.isAnim(JUMP)) {
+        this.anim(JUMP)
+        this.onAnimHalf(() => {
+          this.sound(JUMP, Mob2.hearing / this.distance)
         })
       }
     } else {
-      if(!this.isClip('idle')) {
-        this.playClip('idle')
+      if (!this.isAnim(IDLE)) {
+        this.anim(IDLE)
       }
     }
   }
 
   updateDistance(Player) {
     const player = Player.instances[0]
-    if(player) {
+    if (player) {
       this.distance = getDistance(player.position, this.position)
     }
   }
 
   updateClipHit() {
-    this.playClip('hit')
-    this.playSound('hitmob')
-    this.onClipEnd(()=> {
-      this.playClip('idle')
+    this.anim(HIT)
+    this.sound(HIT)
+    this.onAnimEnd(() => {
+      this.anim(IDLE)
     })
   }
 
   hit(entity) {
-    if(this.isHit()) return
+    if (this.isCooldown) return
     this.createParticles(entity)
     this.hp -= 1
-    this.positionVel.set(0,0)
+    this.positionVel.set(0, 0)
     this.rotationVel = 0
-    if(this.hp > 0)
-      this.updateClipHit()
-    else
-      this.updateClipDaying()
+    if (this.hp > 0) this.updateClipHit()
+    else this.updateClipDaying()
   }
 
   updateClipDaying() {
-    this.scale.set(0,0,0)
-    this.playSound('dead')
-    if(Mob2.cbDead)
-    Mob2.cbDead(this.position)
+    this.scale.set(0, 0, 0)
+    this.sound(DEAD)
+    if (Mob2.cbDead) Mob2.cbDead(this.position)
     this.delete()
   }
 
   createParticles(entity) {
-    const x = (this.position.x*3 + entity.position.x*1)/4
-    const z = (this.position.z*3 + entity.position.z*1)/4
-    this.parent.add(new Particles(new Vector3(x,this.position.y-0.2,z)))
+    const x = (this.position.x * 3 + entity.position.x * 1) / 4
+    const z = (this.position.z * 3 + entity.position.z * 1) / 4
+    this.parent.add(new Particles(new Vector3(x, this.position.y - 0.2, z)))
   }
 
-
-  isBusy() {
-    return this.isClip('hit') || this.isClip('attack') ||  this.hp<=0
+  get isBusy() {
+    return this.isAnim(HIT) || this.isAnim(ATTACK) || this.hp <= 0
   }
 
-  isHit() {
-    return this.isClip('hit')||this.hp<=0
+  get isCooldown() {
+    return this.isAnim(HIT) || this.hp <= 0
   }
 
-  isAttack() {
-    return this.isClip('attack')
-  }
-
-  initAnimation(mesh) {
-    const anims = mesh.animations
-    this.loadClip('attack', anims[ 0 ], 1.0, LoopOnce )
-    this.loadClip('hit', anims[ 2 ], 0.4, LoopOnce  )
-    this.loadClip('idle', anims[ 3 ], 2 )
-    this.loadClip('idle2', anims[ 4 ], 2 )
-    this.loadClip('jump', anims[ 5 ], 1.0)
+  initAnimations() {
+    this.loadAnim(ATTACK, 'attack', 1, true)
+    this.loadAnim(HIT, 'hit', 0.4, true)
+    this.loadAnim(IDLE, 'idle', 2)
+    this.loadAnim(JUMP, 'jump', 1)
   }
 
   initSounds() {
-    this.loadSound('jump', 'sound/jump.wav')
-    this.loadSound('hitmob', 'sound/hit_mob.wav') 
-    this.loadSound('dead', 'sound/death.wav')
+    this.loadSound(JUMP, 'sound/jump.wav')
+    this.loadSound(HIT, 'sound/hit_mob.wav')
+    this.loadSound(DEAD, 'sound/death.wav')
   }
 
   static onDead(callback) {
     this.cbDead = callback
   }
 
-  static update(dt, Player){
+  static update(dt, Player) {
     for (const mob of Mob2.instances) mob.update(dt, Player)
   }
-
 }

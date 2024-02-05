@@ -104,15 +104,20 @@ export function removeFromArray(item, array) {
   return array
 }
 
-export function findByName(name, aClass) {
+export function findInstanceByName(name, aClass) {
   return aClass.instances.find((c) => name === c.name)
+}
+
+export function findByName(name, list) {
+  return list.find((a) => name === a.name)
 }
 
 export function createElement(tag, className, text, onclick) {
   const element = document.createElement(tag)
   element.className = className
   if (text) tag === 'img' ? (element.src = text) : (element.textContent = text)
-  if (onclick) tag === 'a' ? element.href = onclick :  element.onclick = onclick
+  if (onclick)
+    tag === 'a' ? (element.href = onclick) : (element.onclick = onclick)
   return element
 }
 
@@ -127,4 +132,23 @@ export function replaceMaterial(mesh, material) {
   material.normalMap = mesh.material.normalMap
   mesh.material = material
   return mesh
+}
+
+const reg = /\[(.*?)\]/
+export function getSrc(src) {
+  const match = src.match(reg)
+  if (match !== null) {
+    const range = match[1].split('-')
+    const iBegin = parseInt(range[0], 10)
+    const iEnd = parseInt(range[1], 10)
+    const size = iEnd - iBegin + 1
+    const source = src.split('[')[0]
+    const ext = src.split(']')[1]
+    return new Array(size).fill(null).map((e, i) => source + (i + iBegin) + ext)
+  }
+  return [src]
+}
+
+export function clamp1(val) {
+  return val > 1 ? 1 : val < 0 ? 0 : val
 }

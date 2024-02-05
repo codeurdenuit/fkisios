@@ -4,32 +4,31 @@ import {
   AnimationMixer,
   AnimationClip,
   LoopOnce,
-  Object3D,
-  LoopRepeat
+  Object3D
 } from 'three'
 import overwrite from '../function/overwrite'
+import Sound from '../engine/sound'
+import Anim from '../engine/animation'
 
 overwrite(Mesh, AnimationMixer, AnimationClip, LoopOnce)
 import Rapier from '@dimforge/rapier3d-compat'
-import { removeFromArray, randomInt } from '../function/function'
+import { removeFromArray, randomInt, findByName } from '../function/function'
 
 export default class Entity extends Object3D {
   static hitAngle = Math.PI / 2
   static hitDistance = 1.8
+  sounds = new Map()
+  animes = new Map()
 
   constructor(mesh, origin, physic) {
     super()
     this.mixer = new AnimationMixer(mesh)
-    this.clips = new Map()
-    this.sounds = new Map()
+    this.clips = mesh.animations
     this.collider = null
     this.rigidBody = this.initPhysic(physic, origin.position)
     this.physic = physic
     this.positionVel = new Vector2()
     this.rotationVel = 0
-    this.currentClip = null
-    this.animationStep = 1
-    this.animationStepPass = false
     this.hp = 3
     this.position.copy(origin.position)
     this.rotation.copy(origin.rotation)
@@ -61,75 +60,53 @@ export default class Entity extends Object3D {
     this.rotation.y += this.rotationVel
   }
 
-  loadSound(name, url, volume = 1, loop = false) {
-    const audio = new Audio(url)
-    audio.volume = volume
-    audio.loop = loop
-    this.sounds.set(name, audio)
+  loadSound(key, src) {
+    const sound = new Sound(src)
+    this.sounds.set(key, sound)
   }
 
-  playSound(name, rMin, rMax) {
-    const n = rMin ? `${name}${randomInt(rMin, rMax)}` : name
-    this.sounds.get(n).play()
-    return this.sounds.get(n)
+  loadAnim(key, name, duration, once) {
+    const clips = this.clips
+    const anim = new Anim(this.mixer, clips, name, duration, once)
+    this.animes.set(key, anim)
   }
 
-  stop(name) {
-    this.sounds.get(name).pause()
-    this.sounds.get(name).currentTime = 0
+  sound(key, vol) {
+    this.sounds.get(key).play(vol)
   }
 
-  isPlaying(name) {
-    return !this.sounds.get(name).paused
+  stopSound(key) {
+    this.sounds.get(key).stop()
   }
 
-  loadClip(name, animation, duration, once, clampWhenFinished = false) {
-    this.clips.set(name, this.mixer.clipAction(animation))
-    this.clips.get(name).setDuration(duration)
-    this.clips.get(name).setLoop(once || LoopRepeat)
-    this.clips.get(name).clampWhenFinished = clampWhenFinished
+  anim(key, sign) {
+    if (this.animes.get(key).playing) return
+    this.stopAnims()
+    return this.animes.get(key).play(sign)
   }
 
-  playClip(name, sign) {
-    if (this.isClip(name)) return
-    this.mixer._listeners = {}
-    this.stopAllClip()
-    const clip = this.clips.get(name)
-    clip.play()
-    if (sign) clip.timeScale = Math.abs(clip.timeScale) * sign
-    this.currentClip = clip
-    return this.currentClip
+  stopAnims() {
+    for (const [nameAnim, anim] of this.animes) anim.stop()
   }
 
-  stopAllClip() {
-    for (const [nameClip, clip] of this.clips) {
-      clip.stop()
-    }
+  setAnimDuration(key, duration) {
+    this.animes.get(key).duration = duration
   }
 
-  setDurationClip(name, duration) {
-    this.clips.get(name).setDuration(duration)
+  isAnim(key) {
+    return this.animes.get(key).playing
   }
 
-  isClip(name) {
-    return this.clips.get(name).isRunning()
-  }
-
-  onClipEnd(callback) {
+  onAnimEnd(callback) {
     this.mixer.addEventListener('finished', callback)
   }
 
-  onClipLoop(callback) {
+  onAnimLoop(callback) {
     this.mixer.addEventListener('loop', callback)
   }
 
-  onClipHalf(callback) {
+  onAnimHalf(callback) {
     this.mixer.addEventListener('half', callback)
-  }
-
-  onClipStep(step, callback) {
-    this.animationCb = callback
-    this.animationStep = step
   }
 
   updateAnimation(dt) {

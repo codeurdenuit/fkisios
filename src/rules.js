@@ -1,4 +1,4 @@
-import { findByName } from './function/function'
+import { findInstanceByName } from './function/function'
 
 export default class Rules {
   list = []
@@ -9,15 +9,15 @@ export default class Rules {
     const player = Player.instances[0]
 
     this.list.push(() => {
-      const box = findByName('box_A_cast_receive', Box)
+      const box = findInstanceByName('box_A_cast_receive', Box)
       if (!box) {
         sound.play()
         return true
       }
     })
 
-    const block = findByName('block_cast_receive', Block)
-    const area = findByName('area_trigger', Area)
+    const block = findInstanceByName('block_cast_receive', Block)
+    const area = findInstanceByName('area_trigger', Area)
     let timer = 0
     this.list.push((dt) => {
       if (area.containsPoint(block.position)) {
@@ -46,7 +46,7 @@ export default class Rules {
     })
 
     let timer3 = 0
-    const areaEnd = findByName('area_wood_end', Area)
+    const areaEnd = findInstanceByName('area_wood_end', Area)
     this.list.push((dt) => {
       if (!player.ctrl.active && !menu.display) {
         if ((timer3 += dt) > 1.5) {
