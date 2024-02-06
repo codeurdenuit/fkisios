@@ -6,14 +6,14 @@ export default class Clip {
   mixer = null
   current = null
 
-  constructor(mixer, clips, name, duration, once, clampWhenFinished) {
+  constructor(mixer, clips, name, duration, once) {
     const names = getSrc(name)
     const clipsUsed = names.map((n) => findByName(n, clips))
     for (const clip of clipsUsed) {
       const anim = mixer.clipAction(clip)
       anim.setDuration(duration)
       if (once) anim.setLoop(LoopOnce)
-      anim.clampWhenFinished = clampWhenFinished
+      anim.clampWhenFinished = true
       this.animations.push(anim)
     }
     this.mixer = mixer

@@ -2,12 +2,7 @@ import { Vector3, LoopOnce } from 'three'
 import Ai from '../control/control_ai'
 import Particles from '../effect/particles'
 import Entity from './entity'
-import {
-  getGap,
-  inHitBox,
-  castShadowRecursive,
-  getDistance
-} from '../function/function'
+import { getGap, inHitBox, browse, getDistance } from '../function/function'
 
 const ATTACK = 1
 const BLOCK = 2
@@ -20,14 +15,17 @@ const WALK_SHIELD = 8
 const WALK = 9
 const STEP_L = 10
 const STEP_R = 11
+const SOUND_RANGE = 2
+const VELOCITY = 0.4
 
 export default class Mob1 extends Entity {
   static instances = []
   static hitAngle = Math.PI / 2
-  static hitDistance = 1.8
-  static velocity = 0.4
-  static hearing = 2
+  static hitRange = 1.8
   static cbDead = null
+  hp = 2
+  distance = 999
+  ctrl = null
 
   constructor(mesh, origin, physic) {
     super(mesh, origin, physic)
@@ -35,75 +33,116 @@ export default class Mob1 extends Entity {
     this.initVisual(mesh)
     this.initAnimations()
     this.initSounds()
-    this.hp = 2
     Mob1.instances.push(this)
   }
 
   initVisual(mesh) {
-    castShadowRecursive(mesh)
+    browse(mesh, (m) => (m.castShadow = true))
     mesh.position.y -= 0.5
     mesh.scale.set(1.5, 1.5, 1.5)
     this.add(mesh)
   }
 
-  update(dt, Player) {
+  onUpdate(dt, Player) {
     if (!this.isBusy) {
-      this.ctrl.compute(dt, Player, this.position)
       if (this.ctrl.attack) {
-        this.positionVel.set(0, 0)
-        this.rotationVel = 0
-        this.updateClipAttack(Player)
+        this.updatePropsAttack()
+        this.updateAnimAttack(Player)
+      } else if (this.ctrl.moving) {
+        this.updatePropsWalk(dt)
+        this.updateAnimWalk()
       } else {
-        this.positionVel.x = this.ctrl.axis.x * Mob1.velocity
-        this.positionVel.y = this.ctrl.axis.y * Mob1.velocity
-        this.rotationVel = getGap(this.ctrl.angle, this.rotation.y) * dt * 2
-        this.updateClipMove()
+        this.updatePropsIdle(dt)
+        this.updateAnimIdle()
       }
     }
     this.updateDistance(Player)
-    super.update(dt)
   }
 
-  updateClipAttack(Player) {
-    const player = Player.instances[0]
+  updatePropsAttack() {
+    this.positionVel.set(0, 0)
+    this.rotationVel = 0
+  }
+
+  updateAnimAttack(Player) {
+    const player = Player.getInstance(0)
     if (!player) return
-    if (this.isAnim(ATTACK)) return
-    this.anim(ATTACK)
+    if (!this.anim(ATTACK)) return
     this.onAnimHalf(() => {
       this.sound(ATTACK)
       if (inHitBox(this, player)) {
-        player.hit(this, 1)
+        player.hit(this, 1.5)
       }
-    })
-    this.onAnimEnd(() => {
-      this.anim(IDLE_SHIELD)
     })
   }
 
-  updateClipMove() {
-    if (this.positionVel.length() !== 0) {
-      if (this.ctrl.focus) {
-        if (!this.isAnim(WALK_SHIELD)) {
-          this.anim(WALK_SHIELD)
-          this.playSoundStep()
-        }
-      } else {
-        if (!this.isAnim(WALK)) {
-          this.anim(WALK)
-          this.playSoundStep()
-        }
-      }
+  updatePropsWalk(dt) {
+    this.positionVel.x = this.ctrl.axis.x * VELOCITY
+    this.positionVel.y = this.ctrl.axis.y * VELOCITY
+    this.rotationVel = getGap(this.ctrl.angle, this.rotation.y) * dt * 2
+  }
+
+  updateAnimWalk() {
+    if (this.ctrl.focus) {
+      if (!this.anim(WALK_SHIELD)) return
+      this.soundStep()
     } else {
-      if (Math.abs(this.rotationVel) > 0.01) {
-        if (!this.isAnim(STRAF_SHIELD)) {
-          this.anim(STRAF_SHIELD, Math.sign(this.rotationVel))
-          this.playSoundStep()
-        }
-      } else if (this.ctrl.focus) {
-        this.anim(IDLE_SHIELD)
-      } else {
-        this.anim(IDLE)
-      }
+      if (!this.anim(WALK)) return
+      this.soundStep()
+    }
+  }
+
+  updatePropsIdle(dt) {
+    this.positionVel.set(0, 0)
+    this.rotationVel = getGap(this.ctrl.angle, this.rotation.y) * dt * 2
+  }
+
+  updateAnimIdle() {
+    if (this.rotating) {
+      if (!this.anim(STRAF_SHIELD, this.signRotation)) return
+      this.soundStep()
+    } else if (this.ctrl.focus) {
+      this.anim(IDLE_SHIELD)
+    } else {
+      this.anim(IDLE)
+    }
+  }
+
+  updateProsHit() {
+    this.positionVel.set(0, 0)
+    this.rotationVel = 0
+  }
+
+  updateAnimHit() {
+    this.anim(HIT)
+    this.sound(HIT)
+  }
+
+  updateAnimBlock() {
+    this.anim(BLOCK)
+    this.sound(BLOCK)
+  }
+
+  updateAnimDead() {
+    this.anim(DEAD)
+    this.sound(HIT)
+    this.onAnimEnd(() => {
+      this.sound(DEAD)
+      this.delete()
+      if (Mob1.cbDead) Mob1.cbDead(this.position)
+    })
+  }
+
+  hit(entity) {
+    if (this.isCooldown) return
+    this.createParticles(entity)
+    this.updateProsHit()
+    if (this.isVulnerable(entity)) {
+      this.hp -= 1
+      if (this.hp > 0) this.updateAnimHit()
+      else this.updateAnimDead()
+    } else {
+      this.updateAnimBlock()
     }
   }
 
@@ -114,48 +153,12 @@ export default class Mob1 extends Entity {
     }
   }
 
-  playSoundStep() {
+  soundStep() {
     this.onAnimLoop(() => {
-      this.sound(STEP_L, Mob1.hearing / this.distance)
+      this.sound(STEP_L, this.volume)
     })
     this.onAnimHalf(() => {
-      this.sound(STEP_R, Mob1.hearing / this.distance)
-    })
-  }
-
-  updateClipHit() {
-    if (this.isAnim(ATTACK)) {
-      this.anim(HIT)
-      this.sound(HIT)
-    } else {
-      this.anim(BLOCK)
-      this.sound(BLOCK)
-    }
-    this.onAnimEnd(() => {
-      this.anim(IDLE_SHIELD)
-    })
-  }
-
-  hit(entity) {
-    if (this.isCooldown) return
-    this.createParticles(entity)
-    if (this.isAnim(ATTACK) || !inHitBox(this, entity, Math.PI)) {
-      this.hp -= 1
-    }
-    this.positionVel.set(0, 0)
-    this.rotationVel = 0
-    if (this.hp > 0) this.updateClipHit()
-    else this.updateClipDaying()
-  }
-
-  updateClipDaying() {
-    this.anim(DEAD)
-    this.sound(HIT)
-    this.onAnimEnd(() => {
-      this.scale.set(0, 0, 0)
-      this.sound(DEAD)
-      this.delete()
-      if (Mob1.cbDead) Mob1.cbDead(this.position)
+      this.sound(STEP_R, this.volume)
     })
   }
 
@@ -163,6 +166,10 @@ export default class Mob1 extends Entity {
     const x = (this.position.x * 2 + entity.position.x * 1) / 3
     const z = (this.position.z * 2 + entity.position.z * 1) / 3
     this.parent.add(new Particles(new Vector3(x, this.position.y, z)))
+  }
+
+  isVulnerable(entity) {
+    return this.isAnim(ATTACK) || !inHitBox(this, entity, Math.PI)
   }
 
   get isBusy() {
@@ -176,6 +183,10 @@ export default class Mob1 extends Entity {
 
   get isCooldown() {
     return this.isAnim(HIT) || this.isAnim(BLOCK) || this.hp <= 0
+  }
+
+  get volume() {
+    return SOUND_RANGE / this.distance
   }
 
   initAnimations() {

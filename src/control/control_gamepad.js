@@ -9,10 +9,10 @@ const keys = {
   'q':'left',
   'd':'right',
   'v':'attack',
-  'b':'roll',
+  'b':'jump',
   'm':'focus',
   'button_0':'attack',
-  'button_1':'roll',
+  'button_1':'jump',
   'button_7':'focus'
 }
 
@@ -25,7 +25,7 @@ export default class Ctrl {
     this.focus = false
     this.attack = false
     this.magnitude = 1
-    this.roll = false
+    this.jump = false
     this.attackPowerful = false
     this.attackTurbo = false
 
@@ -68,13 +68,13 @@ export default class Ctrl {
     this.focus = !!this.pressed.focus
   }
   updateRoll() {
-    if(!this.previousRoll && this.pressed.roll ) {
-      this.roll = true //uniquement lors d'un relachement
+    if(!this.previousRoll && this.pressed.jump ) {
+      this.jump = true //uniquement lors d'un relachement
     } else {
-      this.roll = false
+      this.jump = false
     }
 
-    this.previousRoll = this.pressed.roll
+    this.previousRoll = this.pressed.jump
   }
   updateAxis() {
     if(joypad.instances[0]) {
@@ -145,6 +145,10 @@ export default class Ctrl {
 
   enable() {
     this.active = true
+  }
+
+  get moving() {
+    return !!this.axis.length()
   }
 
 }

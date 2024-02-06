@@ -3,26 +3,24 @@ import Ai from '../control/control_ai'
 import Particles from '../effect/particles'
 import Entity from './entity'
 import Mob1 from './mob1'
-import {
-  getGap,
-  inHitBox,
-  castShadowRecursive,
-  getDistance
-} from '../function/function'
+import { getGap, inHitBox, browse, getDistance } from '../function/function'
 
 const ATTACK = 1
 const JUMP = 2
 const DEAD = 3
 const HIT = 4
 const IDLE = 5
+const SOUND_RANGE = 1
+const VELOCITY = 0.4
 
 export default class Mob2 extends Entity {
   static instances = Mob1.instances
   static hitAngle = Math.PI / 2
-  static hitDistance = 1.8
-  static velocity = 0.4
-  static hearing = 0.5
+  static hitRange = 1.8
   static cbDead = null
+  hp = 5
+  distance = 999
+  ctrl = null
 
   constructor(mesh, origin, physic) {
     super(mesh, origin, physic)
@@ -30,42 +28,42 @@ export default class Mob2 extends Entity {
     this.initVisual(mesh)
     this.initAnimations()
     this.initSounds()
-    this.hp = 5
-    this.distance = 999
     Mob2.instances.push(this)
   }
 
   initVisual(mesh) {
-    castShadowRecursive(mesh)
+    browse(mesh, (m) => (m.castShadow = true))
     mesh.position.y -= 0.4
     mesh.scale
     this.add(mesh)
   }
 
-  update(dt, Player) {
+  onUpdate(dt, Player) {
     if (!this.isBusy) {
-      this.ctrl.compute(dt, Player, this.position)
-      this.positionVel.x = this.ctrl.axis.x * Mob2.velocity
-      this.positionVel.y = this.ctrl.axis.y * Mob2.velocity
-      this.rotationVel = getGap(this.ctrl.angle, this.rotation.y) * dt * 2
       if (this.ctrl.attack) {
-        this.updateClipAttack(Player)
+        this.updatePropsAttack()
+        this.updateAnimAttack(Player)
+      } else if (this.ctrl.moving) {
+        this.updatePropsWalk(dt)
+        this.updateAnimWalk()
       } else {
-        this.updateClipMove()
+        this.updatePropsIdle(dt)
+        this.updateAnimIdle(Player)
       }
     }
     this.updateDistance(Player)
-    super.update(dt)
   }
 
-  updateClipAttack(Player) {
-    const player = Player.instances[0]
-    if (!player) return
-    if (this.isAnim(ATTACK)) return
-    console.log('updateClipAttack')
+  updatePropsAttack() {
+    this.rotationVel = 0
     this.positionVel.x = 3 * Math.cos(this.rotation.y - Math.PI / 2)
     this.positionVel.y = -3 * Math.sin(this.rotation.y - Math.PI / 2)
-    this.anim(ATTACK)
+  }
+
+  updateAnimAttack(Player) {
+    const player = Player.getInstance(0)
+    if (!player) return
+    if (!this.anim(ATTACK)) return
     this.sound(JUMP)
     this.onAnimHalf(() => {
       if (inHitBox(this, player)) {
@@ -78,19 +76,26 @@ export default class Mob2 extends Entity {
     })
   }
 
-  updateClipMove() {
-    if (this.positionVel.length() !== 0) {
-      if (!this.isAnim(JUMP)) {
-        this.anim(JUMP)
-        this.onAnimHalf(() => {
-          this.sound(JUMP, Mob2.hearing / this.distance)
-        })
-      }
-    } else {
-      if (!this.isAnim(IDLE)) {
-        this.anim(IDLE)
-      }
-    }
+  updatePropsWalk(dt) {
+    this.positionVel.x = this.ctrl.axis.x * VELOCITY
+    this.positionVel.y = this.ctrl.axis.y * VELOCITY
+    this.rotationVel = getGap(this.ctrl.angle, this.rotation.y) * dt * 2
+  }
+
+  updateAnimWalk() {
+    if (!this.anim(JUMP)) return
+    this.onAnimHalf(() => {
+      this.sound(JUMP, this.volume)
+    })
+  }
+
+  updatePropsIdle(dt) {
+    this.positionVel.set(0, 0)
+    this.rotationVel = getGap(this.ctrl.angle, this.rotation.y) * dt * 2
+  }
+
+  updateAnimIdle() {
+    this.anim(IDLE)
   }
 
   updateDistance(Player) {
@@ -137,6 +142,10 @@ export default class Mob2 extends Entity {
 
   get isCooldown() {
     return this.isAnim(HIT) || this.hp <= 0
+  }
+
+  get volume() {
+    return SOUND_RANGE / this.distance
   }
 
   initAnimations() {

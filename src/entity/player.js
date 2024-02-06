@@ -8,8 +8,8 @@ import {
   browse,
   nearest,
   angleOfVector,
-  getDistance,
-  getAngle,
+  getTarget,
+  getAngle
 } from '../function/function'
 
 const ATTACK = 1
@@ -39,32 +39,33 @@ const IDLE_SHIELD = 24
 const RUN = 25
 const RUN_SHIELD = 26
 const STRAF = 27
+const FORWARD = 1
+const BACKWARD = 2
+const LEFT = 3
+const RIGHT = 4
+const VELOCITY = 3
 
 export default class Player extends Entity {
   static instances = []
   static hitAngle = Math.PI / 4
-  static hitDistance = 2.5
-  static velocity = 3
+  static hitRange = 2.5
   hp = 4
   hpMax = 4
   rubies = 0
-  cls = {}
+  speed = 0
+  groundType = null
+  focused = null
+  contact = null
+  eyelid = null
+  light = null
+  ctrl = null
 
   constructor(mesh, origin, physic) {
     super(mesh, origin, physic)
-    this.speed = 0
-    this.eyelid = null
     this.ctrl = new Ctrl(this)
     this.initVisual(mesh)
     this.initAnimations()
     this.initSounds()
-    this.focused = null
-    this.focus = false
-    this.contact = null
-    this.groundType = null
-    this.light = new PointLight(0x77aa77, 0, 8)
-    this.light.position.set(0.2, 0.3, 1.2)
-    this.add(this.light)
     Player.instances.push(this)
   }
 
@@ -72,86 +73,110 @@ export default class Player extends Entity {
     browse(mesh, (m) => {
       m.castShadow = true
       m.receiveShadow = true
-      if (m.name === 'eyelid') {
-        this.eyelid = m
-        this.eyelid.userData.timer = 0
-        this.eyelid.userData.duration = 1
-      }
-      if (m.name === 'head') {
-        m.receiveShadow = false
-      }
     })
+    mesh.getObjectByName('head').receiveShadow = false
+    this.eyelid = mesh.getObjectByName('eyelid')
+    this.eyelid.userData = {timer:0,duration:1}
     mesh.position.y -= 0.5
     mesh.scale.set(1.2, 1.2, 1.2)
     this.add(mesh)
+    this.light = new PointLight(0x77aa77, 0, 8)
+    this.light.position.set(0.2, 0.3, 1.2)
+    this.add(this.light)
   }
 
-  update(dt, Mob, Grass, Box, Area) {
-    this.ctrl.compute(dt)
-    if (!this.isAttack && !this.isCooldown && !this.isRoll) {
-      this.updateEyelid(dt)
-      const velocity = this.rigidBody.linvel()
-      if (velocity.y < -2.5) {
-        this.updateAnimFall()
-        return
-      }
+  onUpdate(dt, Mob, Grass, Box, Area) {
+    this.cancelPush()
+    this.alwayslookTarget()
+    if (this.isBusy) return
+    if (this.isFall) return this.updateAnimFall()
 
-      this.focused = null
-      if (this.ctrl.focus) {
-        if (this.focus === false) {
-          this.sound(SHIELD)
-        }
-        this.focus = true
-        this.focused = this.hasTarget(Mob)
-        if (this.focused) {
-          this.lock(this.focused)
-        }
-      } else {
-        if (this.focus === true) {
-          this.sound(REST)
-        }
-        this.focus = false
-      }
+    this.updateEyes(dt)
+    this.updateGround(Area)
+    this.updateFocus(Mob)
 
-      if (this.ctrl.attack) {
-        this.positionVel.set(0, 0)
-        this.rotationVel = 0
-        this.updateAnimAttack(Mob, Grass, Box)
-      } else {
-        const maxVelosity = Player.velocity * this.ctrl.magnitude
-        this.speed = Math.min(this.speed + dt * 6, maxVelosity)
-        this.positionVel.x = this.ctrl.axis.x * this.speed
-        this.positionVel.y = this.ctrl.axis.y * this.speed
-
-        const lock = this.updateAnimPuch()
-        if (lock) return
-
-        if (this.ctrl.roll && this.ctrl.magnitude > 0.5) {
-          const angle = getGap(angleOfVector(this.ctrl.axis), this.rotation.y)
-          if (Math.abs(angle) > (Math.PI * 3) / 4) {
-            this.positionVel.x = 4 * Math.cos(this.rotation.y + Math.PI / 2)
-            this.positionVel.y = -4 * Math.sin(this.rotation.y + Math.PI / 2)
-          } else if (angle > Math.PI / 4) {
-            this.positionVel.x = 4 * Math.cos(this.rotation.y)
-            this.positionVel.y = -4 * Math.sin(this.rotation.y)
-          } else if (angle < -Math.PI / 4) {
-            this.positionVel.x = 4 * Math.cos(this.rotation.y + Math.PI)
-            this.positionVel.y = -4 * Math.sin(this.rotation.y + Math.PI)
-          } else {
-            this.positionVel.x = 4 * Math.cos(this.rotation.y - Math.PI / 2)
-            this.positionVel.y = -4 * Math.sin(this.rotation.y - Math.PI / 2)
-          }
-        }
-        if (this.ctrl.focus) {
-          this.rotationVel = 0
-        } else {
-          this.rotationVel = getGap(this.ctrl.angle, this.rotation.y) * dt * 10
-        }
-        this.updateAnimMove()
-        this.updateGround(Area)
-      }
+    if (this.isPushing) {
+      this.updatePropsPush(dt)
+      this.updateAnimPush()
+    } else if (this.ctrl.attack) {
+      this.updatePropsAttack()
+      this.updateAnimAttack(Mob, Grass, Box)
+    } else if (!this.ctrl.jump && this.ctrl.moving) {
+      this.updatePropsWalk(dt)
+      this.updateAnimWalk()
+    } else if (this.ctrl.moving) {
+      this.updatePropsJump(dt)
+      this.updateAnimJump()
+    } else {
+      this.updatePropsIdle(dt)
+      this.updateAnimIdle()
     }
-    super.update(dt)
+    this.contact = null
+  }
+
+  cancelPush() {
+    if (!this.contact || !this.ctrl.moving) {
+      this.stopSound(PUSH)
+      this.rigidBody.setEnabledTranslations(true, true, true, true)
+    }
+  }
+
+  alwayslookTarget() {
+    if (this.focused)
+      this.rotation.y = getAngle(this.focused.position, this.position)
+  }
+
+  updateFocus(Mob) {
+    this.updateFocusSound()
+    this.updateFocused(Mob)
+  }
+
+  updateFocusSound() {
+    if (this.ctrl.focus) {
+      if (!this.isShield) this.sound(SHIELD)
+    } else {
+      if (this.isShield) this.sound(REST)
+    }
+  }
+
+  updateFocused(Mob) {
+    if (this.ctrl.focus) this.focused = getTarget(this.position, Mob, 4)
+    else this.focused = null
+  }
+
+  updatePropsAttack() {
+    this.positionVel.set(0, 0)
+    this.rotationVel = 0
+  }
+
+  updateAnimAttack(Mob, Grass, Box) {
+    if (this.isAttack) return
+    if (this.ctrl.attackPowerful) {
+      this.anim(ATTACK_LOADED)
+      this.sound(YELL)
+      this.onAnimHalf(() => {
+        this.sound(ROLL)
+        this.attack(Mob, Grass, Box, Math.PI * 1.5)
+      })
+    } else if (this.ctrl.attackTurbo) {
+      this.anim(ATTACK).setDuration(0.15)
+      this.sound(ATTACK)
+      this.sound(SWORD)
+      this.onAnimHalf(() => {
+        this.attack(Mob, Grass, Box)
+      })
+    } else {
+      this.anim(ATTACK).setDuration(0.4)
+      this.sound(ATTACK)
+      this.sound(SWORD)
+      this.onAnimHalf(() => {
+        this.attack(Mob, Grass, Box)
+      })
+    }
+    this.onAnimEnd(() => {
+      this.anim(IDLE_SHIELD)
+      this.light.intensity = 0
+    })
   }
 
   attack(Mob, Grass, Box, range) {
@@ -198,108 +223,92 @@ export default class Player extends Entity {
     }
   }
 
-  updateAnimAttack(Mob, Grass, Box) {
-    if (this.isAttack) return
-    if (this.ctrl.attackPowerful) {
-      this.anim(ATTACK_LOADED)
-      this.sound(YELL)
-      this.onAnimHalf(() => {
-        this.sound(ROLL)
-        this.attack(Mob, Grass, Box, Math.PI * 1.5)
-      })
-    } else if (this.ctrl.attackTurbo) {
-      this.anim(ATTACK).setDuration(0.15)
-      this.sound(ATTACK)
-      this.sound(SWORD)
-      this.onAnimHalf(() => {
-        this.attack(Mob, Grass, Box)
-      })
-    } else {
-      this.anim(ATTACK).setDuration(0.4)
-      this.sound(ATTACK)
-      this.sound(SWORD)
-      this.onAnimHalf(() => {
-        this.attack(Mob, Grass, Box)
-      })
-    }
-    this.onAnimEnd(() => {
-      this.anim(IDLE_SHIELD)
-      this.light.intensity = 0
-    })
+  updatePropsWalk(dt) {
+    const maxVelosity = VELOCITY * this.ctrl.magnitude
+    this.speed = Math.min(this.speed + dt * 6, maxVelosity)
+    this.positionVel.x = this.ctrl.axis.x * this.speed
+    this.positionVel.y = this.ctrl.axis.y * this.speed
+    if (this.ctrl.focus) this.rotationVel = 0
+    if (this.focused)
+      this.rotation.y = getAngle(this.focused.position, this.position)
+    else this.rotationVel = getGap(this.ctrl.angle, this.rotation.y) * dt * 10
   }
 
-  updateAnimMove() {
-    this.rotation.z = 0
-    this.rotation.x = 0
-    if (this.positionVel.length() !== 0) {
-      if (this.ctrl.focus) {
-        const moveAngle = angleOfVector(this.ctrl.axis)
-        const bodyAngle = this.rotation.y
-        const angle = getGap(moveAngle, bodyAngle)
-        if (Math.abs(angle) > (Math.PI * 3) / 4) {
-          if (this.ctrl.roll) {
-            if (!this.isAnim(JUMP)) {
-              this.anim(JUMP)
-              this.sound(ROLL_VOICE)
-            }
-          } else {
-            if (!this.isAnim(RUN_SHIELD)) {
-              this.anim(RUN_SHIELD, -1)
-              this.playSoundStep()
-            }
-          }
-        } else if (angle > Math.PI / 4) {
-          if (this.ctrl.roll) {
-            if (!this.isAnim(JUMP)) {
-              this.anim(JUMP)
-              this.sound(ROLL_VOICE)
-            }
-          } else {
-            if (!this.isAnim(STRAF)) {
-              this.anim(STRAF, -1)
-              this.playSoundStep()
-            }
-          }
-        } else if (angle < -Math.PI / 4) {
-          if (this.ctrl.roll) {
-            if (!this.isAnim(JUMP)) {
-              this.anim(JUMP)
-              this.sound(ROLL_VOICE)
-            }
-          } else {
-            if (!this.isAnim(STRAF)) {
-              this.anim(STRAF, 1)
-              this.playSoundStep()
-            }
-          }
-        } else {
-          if (this.ctrl.roll) {
-            if (!this.isAnim(ROLL)) {
-              this.anim(ROLL)
-              this.sound(ROLL)
-              this.sound(ROLL_VOICE)
-            }
-          } else {
-            if (!this.isAnim(RUN_SHIELD)) {
-              this.anim(RUN_SHIELD, 1)
-              this.playSoundStep()
-            }
-          }
-        }
-      } else if (this.ctrl.roll) {
-        if (!this.isAnim(ROLL)) {
-          this.anim(ROLL)
-          this.sound(ROLL)
-          this.sound(ROLL_VOICE)
-        }
-      } else {
-        if (!this.isAnim(RUN)) {
-          this.anim(RUN)
+  updateAnimWalk() {
+    if (this.ctrl.focus) {
+      switch (this.getMoveDirection()) {
+        case BACKWARD:
+          if (!this.anim(RUN_SHIELD, -1)) return
           this.playSoundStep()
-        }
-        this.setAnimDuration(RUN, (0.5 * 3) / (this.speed + 0.5))
+          break
+        case LEFT:
+          if (!this.anim(STRAF, -1)) return
+          this.playSoundStep()
+          break
+        case RIGHT:
+          if (!this.anim(STRAF, 1)) return
+          this.playSoundStep()
+          break
+        case FORWARD:
+          if (!this.anim(RUN_SHIELD, 1)) return
+          this.playSoundStep()
       }
-    } else if (this.ctrl.focus) {
+    } else {
+      if (this.anim(RUN)) {
+        this.playSoundStep()
+      }
+      this.setAnimDuration(RUN, (0.5 * 3) / (this.speed + 0.5))
+    }
+  }
+
+  updatePropsJump(dt) {
+    switch (this.getMoveDirection()) {
+      case BACKWARD:
+        this.positionVel.x = 4 * Math.cos(this.rotation.y + Math.PI / 2)
+        this.positionVel.y = -4 * Math.sin(this.rotation.y + Math.PI / 2)
+        break
+      case LEFT:
+        this.positionVel.x = 4 * Math.cos(this.rotation.y)
+        this.positionVel.y = -4 * Math.sin(this.rotation.y)
+        break
+      case RIGHT:
+        this.positionVel.x = 4 * Math.cos(this.rotation.y + Math.PI)
+        this.positionVel.y = -4 * Math.sin(this.rotation.y + Math.PI)
+        break
+      case FORWARD:
+        this.positionVel.x = 4 * Math.cos(this.rotation.y - Math.PI / 2)
+        this.positionVel.y = -4 * Math.sin(this.rotation.y - Math.PI / 2)
+    }
+  }
+
+  updateAnimJump() {
+    switch (this.getMoveDirection()) {
+      case BACKWARD:
+        if (!this.anim(JUMP)) return
+        this.sound(ROLL_VOICE)
+        break
+      case LEFT:
+        if (!this.anim(JUMP)) return
+        this.sound(ROLL_VOICE)
+        break
+      case RIGHT:
+        if (!this.anim(JUMP)) return
+        this.sound(ROLL_VOICE)
+        break
+      case FORWARD:
+        if (!this.anim(ROLL)) return
+        this.sound(ROLL)
+        this.sound(ROLL_VOICE)
+    }
+  }
+
+  updatePropsIdle(dt) {
+    this.positionVel.set(0, 0)
+    this.rotationVel = 0
+  }
+
+  updateAnimIdle() {
+    if (this.ctrl.focus) {
       this.anim(IDLE_SHIELD)
     } else {
       this.anim(IDLE)
@@ -309,14 +318,14 @@ export default class Player extends Entity {
   playSoundStep() {
     this.mixer._listeners = {}
     this.onAnimLoop(() => {
-      const volume = this.speed / Player.velocity
+      const volume = this.speed / VELOCITY
       if (this.groundType === 'stone') this.sound(STEP_L_STONE, volume)
       else if (this.groundType === 'dirt') this.sound(STEP_L_DIRT, volume)
       else if (this.groundType === 'wood') this.sound(STEP_L_WOOD, volume)
       else this.sound(STEP_L_GRASS, volume)
     })
     this.onAnimHalf(() => {
-      const volume = this.speed / Player.velocity
+      const volume = this.speed / VELOCITY
       if (this.groundType === 'stone') this.sound(STEP_R_STONE, volume)
       else if (this.groundType === 'dirt') this.sound(STEP_R_DIRT, volume)
       else if (this.groundType === 'wood') this.sound(STEP_R_WOOD, volume)
@@ -373,58 +382,36 @@ export default class Player extends Entity {
     this.parent.add(new Particles(new Vector3(x, this.position.y, z)))
   }
 
-  hasTarget(Mob) {
-    const entity = nearest(this.position, Mob.instances)
-    if (!entity) return null
-    const distance = getDistance(entity.position, this.position)
-    return distance < 4 ? entity : null
-  }
-
-  lock(entity) {
-    this.rotation.y = getAngle(entity.position, this.position)
-  }
-
-  updateAnimPuch() {
-    if (this.contact)
-      if (this.contact) {
-        if (
-          this.positionVel.length() &&
-          ((this.contact.x === 0 &&
-            -Math.sign(this.contact.y) === Math.sign(this.positionVel.y)) ||
-            (this.contact.y === 0 &&
-              -Math.sign(this.contact.x) === Math.sign(this.positionVel.x)))
-        ) {
-          this.rotationVel = 0
-          const angle = angleOfVector(this.contact)
-          this.rigidBody.lockTranslations(true)
-          if (!this.isPlaying('push')) {
-            this.sound(PUSH)
-          }
-          if (this.contact.x === 0) {
-            this.positionVel.x = 0
-            this.anim(PUSH)
-            this.rotation.y = angle + Math.PI
-            this.rigidBody.setEnabledTranslations(false, true, true, true)
-            this.contact = null
-            return true
-          } else {
-            this.positionVel.y = 0
-            this.anim(PUSH)
-            this.rotation.y = -angle
-            this.rigidBody.setEnabledTranslations(true, true, false, true)
-            this.contact = null
-            return true
-          }
-        }
-      }
-    this.stopSound(PUSH)
+  updatePropsPush(dt) {
+    const maxVelosity = VELOCITY * this.ctrl.magnitude
+    this.speed = Math.min(this.speed + dt * 6, maxVelosity)
+    this.positionVel.x = this.ctrl.axis.x * this.speed
+    this.positionVel.y = this.ctrl.axis.y * this.speed
+    this.rotationVel = 0
+    this.rigidBody.lockTranslations(true)
+    const angle = angleOfVector(this.contact)
+    if (this.contact.x === 0) {
+      this.positionVel.x = 0
+      this.rotation.y = angle + Math.PI
+      this.rigidBody.setEnabledTranslations(false, true, true, true)
+    } else {
+      this.positionVel.y = 0
+      this.rotation.y = -angle
+      this.rigidBody.setEnabledTranslations(true, true, false, true)
+    }
     this.contact = null
-    this.rigidBody.setEnabledTranslations(true, true, true)
-    return false
+  }
+  updateAnimPush() {
+    if (!this.anim(PUSH)) return
+    this.sound(PUSH)
   }
 
-  startAnimPush(normal) {
+  setContactWithBlock(normal) {
     this.contact = normal
+  }
+
+  get isBusy() {
+    return this.isAttack || this.isCooldown
   }
 
   get isCooldown() {
@@ -441,6 +428,34 @@ export default class Player extends Entity {
     return this.isAnim(ATTACK) || this.isAnim(ATTACK_LOADED)
   }
 
+  get isShield() {
+    return this.isAnim(IDLE_SHIELD) || !this.isAnim(RUN_SHIELD)
+  }
+
+  get isPushing() {
+    const c = this.contact
+    if (!c) return false
+    if (!this.positionVel.length()) return false
+    const pushedY =
+      c.x === 0 && -Math.sign(c.y) === Math.sign(this.positionVel.y)
+    const pushedX =
+      c.y === 0 && -Math.sign(c.x) === Math.sign(this.positionVel.x)
+    if (!pushedY && !pushedX) return false
+    return true
+  }
+
+  get active() {
+    return this.ctrl.active
+  }
+
+  set active(value) {
+    this.ctrl.active = value
+  }
+
+  get focus() {
+    return this.focused
+  }
+
   updateGround(Area) {
     for (const area of Area.instances) {
       if (area.containsPoint(this.position)) {
@@ -451,7 +466,7 @@ export default class Player extends Entity {
     this.groundType = null
   }
 
-  updateEyelid(dt) {
+  updateEyes(dt) {
     if (this.eyelid.userData.timer > this.eyelid.userData.duration) {
       this.eyelid.userData.timer = 0
       if (this.eyelid.scale.x === 0) {
@@ -463,6 +478,21 @@ export default class Player extends Entity {
       }
     }
     this.eyelid.userData.timer += dt
+  }
+
+  getMoveDirection() {
+    const moveAngle = angleOfVector(this.ctrl.axis)
+    const bodyAngle = this.rotation.y
+    const angle = getGap(moveAngle, bodyAngle)
+    if (Math.abs(angle) > (Math.PI * 3) / 4) {
+      return BACKWARD
+    } else if (angle > Math.PI / 4) {
+      return LEFT
+    } else if (angle < -Math.PI / 4) {
+      return RIGHT
+    } else {
+      return FORWARD
+    }
   }
 
   initAnimations() {
@@ -495,24 +525,20 @@ export default class Player extends Entity {
     this.loadSound(STEP_R_STONE, 'sound/step_stone[3-4].wav')
     this.loadSound(STEP_L_WOOD, 'sound/step_wood1.wav')
     this.loadSound(STEP_R_WOOD, 'sound/step_wood2.wav')
-    this.loadSound(STEP_L_GRASS, 'sound/step_grass[1-2].wav')
-    this.loadSound(STEP_R_GRASS, 'sound/step_grass[3-4].wav')
+    this.loadSound(STEP_L_GRASS, 'sound/step_grass[1-2].wav', 0.8)
+    this.loadSound(STEP_R_GRASS, 'sound/step_grass[3-4].wav', 0.8)
     this.loadSound(STEP_L_DIRT, 'sound/step_dirt[1-2].wav')
     this.loadSound(STEP_R_DIRT, 'sound/step_dirt[3-4].wav')
     this.loadSound(DEAD, 'sound/death.wav')
-    this.loadSound(PUSH, 'sound/push.wav')
-  }
-
-  get active() {
-    return this.ctrl.active
-  }
-
-  set active(value) {
-    this.ctrl.active = value
+    this.loadSound(PUSH, 'sound/push.wav', 0.8, true)
   }
 
   static update(dt, Mob1, Grass, Box, Area) {
     for (const player of Player.instances)
       player.update(dt, Mob1, Grass, Box, Area)
+  }
+
+  static getInstance(index) {
+    return Player.instances[index]
   }
 }

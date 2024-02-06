@@ -77,7 +77,7 @@ export default class World extends Object3D {
   }
 
   start() {
-    this.soundAmbient.stop()
-    this.soundMusic.stop()
+    this.soundAmbient.play()
+    this.soundMusic.play()
   }
 }

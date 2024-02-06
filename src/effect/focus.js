@@ -31,14 +31,14 @@ export default class Focus extends Object3D {
 
   update(dt, Player, camera) {
     const player = Player.instances[0]
-    if (player && player.focused) {
-      if (this.previousFocus !== player.focused) {
+    if (player && player.focus) {
+      if (this.previousFocus !== player.focus) {
         this.timer = 0
         this.soundFocus.play()
       }
       this.visible = true
       const progress = Math.pow(Math.max(1 - this.timer, 0), 2)
-      this.position.copy(player.focused.position)
+      this.position.copy(player.focus.position)
       this.arrowTop.position.y = 0.5 + progress
       this.arrowBottom.position.y = -0.5 - progress
       this.arrowLeft.position.x = 0.5 + progress
@@ -47,7 +47,7 @@ export default class Focus extends Object3D {
       this.lookAt(camera.position)
       this.rotateZ(this.timer / 4)
       this.timer += dt * 10
-      this.previousFocus = player.focused
+      this.previousFocus = player.focus
     } else {
       if (this.timer !== 0) this.soundCancel.play()
       this.visible = false

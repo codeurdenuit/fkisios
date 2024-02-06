@@ -6,6 +6,9 @@ import { GammaCorrectionShader } from 'three/examples/jsm/shaders/GammaCorrectio
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 //import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js'
+import { Mesh, AnimationMixer, AnimationClip, LoopOnce } from 'three'
+import overwrite from '../function/overwrite'
+overwrite(Mesh, AnimationMixer, AnimationClip, LoopOnce)
 
 export default class Graphic extends WebGLRenderer {
   scene = null
@@ -14,8 +17,8 @@ export default class Graphic extends WebGLRenderer {
 
   constructor(scene, camera, fx) {
     const canvas = document.getElementById('canvas')
-    canvas.width = innerWidth 
-    canvas.height = innerHeight 
+    canvas.width = innerWidth
+    canvas.height = innerHeight
     super({ canvas, antialias: true })
     this.shadowMap.enabled = true
     this.autoClear = false

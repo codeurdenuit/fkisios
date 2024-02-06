@@ -55,7 +55,7 @@ export default class Block extends Mesh {
           }
           if (contactDir.x !== 0 || contactDir.y !== 0) {
             this.collision = true
-            player.startClipPush(contactDir)
+            player.setContactWithBlock(contactDir)
           }
         }
       )

@@ -20,10 +20,11 @@ export default class Sound {
     this.current.currentTime = 0
   }
 
-  play(volume = 1) {
+  play(volume) {
     this.stop()
     const index = randomInt(0, this.audios.length - 1)
     this.audios[index].play()
+    if(volume!==undefined)
     this.audios[index].volume = clamp1(volume)
     this.current = this.audios[index]
   }

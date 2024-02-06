@@ -59,14 +59,14 @@ export function spreadAround(pos, dx, dz) {
 
 export function inHitBox(objOrigin, objTarget, hitAngleForce) {
   const hitAngle = hitAngleForce || objOrigin.constructor.hitAngle
-  const hitDistance = objOrigin.constructor.hitDistance
+  const hitRange = objOrigin.constructor.hitRange
   const originPos = objOrigin.position
   const targetPox = objTarget.position
   const originDir = objOrigin.rotation.y
   const targetDir = getAngle(targetPox, originPos)
   const deltaPos = getDistance(targetPox, originPos)
   const deltaDir = getGapAbs(targetDir, originDir)
-  return deltaPos < hitDistance && deltaDir < hitAngle
+  return deltaPos < hitRange && deltaDir < hitAngle
 }
 
 export function castShadowRecursive(object) {
@@ -151,4 +151,11 @@ export function getSrc(src) {
 
 export function clamp1(val) {
   return val > 1 ? 1 : val < 0 ? 0 : val
+}
+
+export function getTarget(position,Mob, distance) {
+  const entity = nearest(position, Mob.instances)
+  if (!entity) return null
+  const dis = getDistance(entity.position, position)
+  return dis < distance ? entity : null
 }

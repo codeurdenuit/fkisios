@@ -107,4 +107,9 @@ export default class Ai {
     if (distance < Ai.earDistance) return true
     return gap < Ai.viewFov && distance < Ai.viewDistance
   }
+
+  get moving() {
+    return !!this.axis.length()
+  }
+
 }

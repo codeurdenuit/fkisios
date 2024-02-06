@@ -1,22 +1,12 @@
-import {
-  Mesh,
-  Vector2,
-  AnimationMixer,
-  AnimationClip,
-  LoopOnce,
-  Object3D
-} from 'three'
-import overwrite from '../function/overwrite'
+import { Vector2, AnimationMixer, Object3D } from 'three'
 import Sound from '../engine/sound'
 import Anim from '../engine/animation'
-
-overwrite(Mesh, AnimationMixer, AnimationClip, LoopOnce)
 import Rapier from '@dimforge/rapier3d-compat'
-import { removeFromArray, randomInt, findByName } from '../function/function'
+import { removeFromArray } from '../function/function'
 
 export default class Entity extends Object3D {
   static hitAngle = Math.PI / 2
-  static hitDistance = 1.8
+  static hitRange = 1.8
   sounds = new Map()
   animes = new Map()
 
@@ -34,9 +24,11 @@ export default class Entity extends Object3D {
     this.rotation.copy(origin.rotation)
   }
 
-  update(dt) {
+  update(...args) {
+    this.ctrl.compute(args[0], args[1], this.position)
+    this.onUpdate(...args)
     this.updatePhysic()
-    this.updateAnimation(dt)
+    this.updateAnimation(args[0])
   }
 
   initPhysic(physic, origin) {
@@ -60,8 +52,21 @@ export default class Entity extends Object3D {
     this.rotation.y += this.rotationVel
   }
 
-  loadSound(key, src) {
-    const sound = new Sound(src)
+  get signRotation() {
+    return Math.sign(this.rotationVel)
+  }
+
+  get rotating() {
+    return Math.abs(this.rotationVel) > 0.01
+  }
+
+  get isFall() {
+    const velocity = this.rigidBody.linvel()
+    return velocity.y < -2.5
+  }
+
+  loadSound(key, src, vol = 1, loop = false) {
+    const sound = new Sound(src, vol, loop)
     this.sounds.set(key, sound)
   }
 
@@ -80,7 +85,7 @@ export default class Entity extends Object3D {
   }
 
   anim(key, sign) {
-    if (this.animes.get(key).playing) return
+    if (this.animes.get(key).playing) return false
     this.stopAnims()
     return this.animes.get(key).play(sign)
   }
