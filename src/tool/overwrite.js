@@ -1,6 +1,10 @@
 export default function overwrite(Mesh, AnimationMixer, AnimationClip, LoopOnce) {
-  //THREE.AnimationAction.prototype._updateTime  //Class non accessible
-  //Contournement
+
+  Mesh.prototype.isRootName = function isRootName(name) {
+    return this.name.includes(name)
+  }
+  //this Class is not directly accessible ! 
+  //THREE.AnimationAction.prototype._updateTime  
   const mesh = new Mesh()
   const mixer = new AnimationMixer()
   const anime = new AnimationClip('empty', 1, [])
@@ -151,3 +155,4 @@ export default function overwrite(Mesh, AnimationMixer, AnimationClip, LoopOnce)
     return time
   }
 }
+

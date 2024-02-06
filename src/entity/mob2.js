@@ -3,7 +3,7 @@ import Ai from '../control/control_ai'
 import Particles from '../effect/particles'
 import Entity from './entity'
 import Mob1 from './mob1'
-import { getGap, inHitBox, browse, getDistance } from '../function/function'
+import { getGap, inHitBox, browse, getDistance } from '../tool/function'
 
 const ATTACK = 1
 const JUMP = 2
@@ -12,13 +12,14 @@ const HIT = 4
 const IDLE = 5
 const SOUND_RANGE = 1
 const VELOCITY = 0.4
+const DEMAGE = 1.5
 
 export default class Mob2 extends Entity {
   static instances = Mob1.instances
   static hitAngle = Math.PI / 2
   static hitRange = 1.8
   static cbDead = null
-  hp = 5
+  hp = 3
   distance = 999
   ctrl = null
 
@@ -67,7 +68,7 @@ export default class Mob2 extends Entity {
     this.sound(JUMP)
     this.onAnimHalf(() => {
       if (inHitBox(this, player)) {
-        player.hit(this, 0.5)
+        player.hit(this, DEMAGE)
       }
     })
     this.onAnimEnd(() => {

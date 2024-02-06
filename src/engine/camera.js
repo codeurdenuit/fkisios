@@ -1,5 +1,5 @@
 import { PerspectiveCamera }  from 'three'
-import {getDistance} from '../function/function'
+import {getDistance} from '../tool/function'
 
 export default class CameraPlayer extends PerspectiveCamera {
 

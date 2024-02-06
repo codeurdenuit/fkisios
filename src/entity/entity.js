@@ -2,7 +2,7 @@ import { Vector2, AnimationMixer, Object3D } from 'three'
 import Sound from '../engine/sound'
 import Anim from '../engine/animation'
 import Rapier from '@dimforge/rapier3d-compat'
-import { removeFromArray } from '../function/function'
+import { removeFromArray } from '../tool/function'
 
 export default class Entity extends Object3D {
   static hitAngle = Math.PI / 2
@@ -43,11 +43,9 @@ export default class Entity extends Object3D {
   }
 
   updatePhysic() {
-    const voll = this.rigidBody.linvel()
-    this.rigidBody.setLinvel(
-      { x: this.positionVel.x, y: voll.y, z: this.positionVel.y },
-      true
-    )
+    const velY = this.rigidBody.linvel().y
+    const vel = this.positionVel
+    this.rigidBody.setLinvel({ x: vel.x, y: velY, z: vel.y }, true)
     this.position.copy(this.rigidBody.translation())
     this.rotation.y += this.rotationVel
   }

@@ -1,25 +1,36 @@
 import { Mesh } from 'three'
-import { removeFromArray, inBox } from '../function/function'
+import { removeFromArray, inBox } from '../tool/function'
+const HITBOX = 0.8
+const HP = 1
 
 export default class Heart extends Mesh {
   static instances = []
   static sound = new Audio('sound/heart.wav')
+  progress = 0
+  holder = null
+  yOrigin = null
 
   constructor(mesh, position) {
     super()
+    this.initVisual(mesh)
+    this.initState(position)
+    Heart.instances.push(this)
+  }
+
+  initVisual(mesh) {
     this.copy(mesh, true)
     this.castShadow = true
+  }
+
+  initState(position) {
     if (position) this.position.copy(position)
     this.yOrigin = this.position.y
-    this.progress = 0
-    this.holder = null
-    Heart.instances.push(this)
   }
 
   checkPlayer(Player) {
     if (this.holder) return
     for (const player of Player.instances) {
-      if (inBox(this.position, player.position, 0.8)) {
+      if (inBox(this.position, player.position, HITBOX)) {
         this.collect(player)
       }
     }
@@ -32,7 +43,7 @@ export default class Heart extends Mesh {
     this.rotation.y = 0
     this.progress = 0
     Heart.sound.play()
-    entity.addHP(1)
+    entity.addHP(HP)
     setTimeout(() => {
       this.removeFromParent()
       removeFromArray(this, Heart.instances)

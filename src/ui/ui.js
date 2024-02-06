@@ -1,4 +1,4 @@
-import {createElement} from '../function/function'
+import {createElement} from '../tool/function'
 
 
 export default class UI  {

@@ -1,26 +1,26 @@
 import { Mesh, Clock } from 'three'
 import materialGrass from '../shader/grass'
 import materialPlant from '../shader/plant'
-import { replaceMaterial } from '../function/function'
+import { replaceMaterial } from '../tool/function'
 
 export default class Grass extends Mesh {
   static instances = []
   static cbCut = null
   static sound = new Audio('sound/cut.wav')
+  progress = 0
+  clock = null
 
   constructor(mesh) {
     super()
     this.initVisual(mesh)
-    this.children[0].visible = false
-    this.clock = null
-    this.progress = 0
     Grass.instances.push(this)
   }
 
   initVisual(mesh) {
-    if (mesh.name.includes('plant')) replaceMaterial(mesh, materialPlant)
-    else replaceMaterial(mesh, materialGrass)
+    const isPlant = mesh.isRootName('plant')
+    replaceMaterial(mesh, isPlant ? materialPlant : materialGrass)
     this.copy(mesh)
+    this.children[0].visible = false
   }
 
   cut() {
@@ -43,17 +43,15 @@ export default class Grass extends Mesh {
 
   animation() {
     const dt = this.clock.getDelta()
+    const child = this.children[0]
     this.progress += dt * 2.5
     if (this.progress <= 1) {
-      this.children[0].morphTargetInfluences[0] = Math.sin(
-        (Math.PI / 2) * this.progress
-      )
-      this.children[0].morphTargetInfluences[1] =
-        Math.pow(Math.exp(this.progress), 2) / 7.5
-      this.children[0].position.y = 0.1 * Math.sin(Math.PI * this.progress)
+      child.morphTargetInfluences[0] = Math.sin((Math.PI / 2) * this.progress)
+      child.morphTargetInfluences[1] = Math.pow(Math.exp(this.progress), 2) / 7
+      child.position.y = 0.1 * Math.sin(Math.PI * this.progress)
       requestAnimationFrame(this.animation)
     } else {
-      this.children[0].visible = false
+      child.visible = false
     }
   }
 

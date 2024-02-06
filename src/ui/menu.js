@@ -1,4 +1,4 @@
-import {createElement} from '../function/function'
+import {createElement} from '../tool/function'
 const text = `
 Javascript has no limits.
 I'm preparing a ThreeJS tutorial for creating video games. 

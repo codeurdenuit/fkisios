@@ -7,7 +7,7 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 //import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js'
 import { Mesh, AnimationMixer, AnimationClip, LoopOnce } from 'three'
-import overwrite from '../function/overwrite'
+import overwrite from '../tool/overwrite'
 overwrite(Mesh, AnimationMixer, AnimationClip, LoopOnce)
 
 export default class Graphic extends WebGLRenderer {

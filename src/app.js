@@ -1,5 +1,5 @@
 import {Scene} from 'three'
-import World from './world'
+import World from './entity/world'
 import Player from './entity/player'
 import Mob1 from './entity/mob1'
 import Mob2 from './entity/mob2'
@@ -13,11 +13,11 @@ import Focus from './effect/focus'
 import physic from './engine/physic'
 import Graphic from './engine/graphic'
 import Camera from './engine/camera'
-import Rules from './rules'
+import Rules from './tool/rules'
 import UI from './ui/ui'
 import Menu from './ui/menu'
-import loadAssets from './function/loader'
-import { clone, spreadAround, proba } from './function/function'
+import loadAssets from './tool/loader'
+import { clone, spreadAround, proba } from './tool/function'
 
 const ast = await loadAssets()
 

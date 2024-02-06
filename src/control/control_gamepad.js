@@ -1,5 +1,5 @@
 import { Vector2 } from 'three'
-import {round } from '../function/function'
+import {round } from '../tool/function'
 import 'joypad.js'
 
 

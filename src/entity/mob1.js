@@ -2,7 +2,7 @@ import { Vector3, LoopOnce } from 'three'
 import Ai from '../control/control_ai'
 import Particles from '../effect/particles'
 import Entity from './entity'
-import { getGap, inHitBox, browse, getDistance } from '../function/function'
+import { getGap, inHitBox, browse, getDistance } from '../tool/function'
 
 const ATTACK = 1
 const BLOCK = 2
@@ -17,6 +17,7 @@ const STEP_L = 10
 const STEP_R = 11
 const SOUND_RANGE = 2
 const VELOCITY = 0.4
+const DEMAGE = 1.5
 
 export default class Mob1 extends Entity {
   static instances = []
@@ -71,7 +72,7 @@ export default class Mob1 extends Entity {
     this.onAnimHalf(() => {
       this.sound(ATTACK)
       if (inHitBox(this, player)) {
-        player.hit(this, 1.5)
+        player.hit(this, DEMAGE)
       }
     })
   }
@@ -192,12 +193,12 @@ export default class Mob1 extends Entity {
   initAnimations() {
     this.loadAnim(ATTACK, 'attack', 2, true)
     this.loadAnim(BLOCK, 'block', 0.2, true)
-    this.loadAnim(DEAD, 'death', 2, true)
+    this.loadAnim(DEAD, 'dead', 2, true)
     this.loadAnim(HIT, 'hit', 0.5, true)
-    this.loadAnim(IDLE, 'idle ', 2)
-    this.loadAnim(IDLE_SHIELD, 'idle shield', 2)
-    this.loadAnim(STRAF_SHIELD, 'straff shield', 0.5)
-    this.loadAnim(WALK_SHIELD, 'walk shield', 1.48)
+    this.loadAnim(IDLE, 'idle', 2)
+    this.loadAnim(IDLE_SHIELD, 'idle_shield', 2)
+    this.loadAnim(STRAF_SHIELD, 'straff_shield', 0.5)
+    this.loadAnim(WALK_SHIELD, 'walk_shield', 1.48)
     this.loadAnim(WALK, 'walk', 1.48)
   }
 

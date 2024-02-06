@@ -153,9 +153,22 @@ export function clamp1(val) {
   return val > 1 ? 1 : val < 0 ? 0 : val
 }
 
-export function getTarget(position,Mob, distance) {
+export function getTarget(position, Mob, distance) {
   const entity = nearest(position, Mob.instances)
   if (!entity) return null
   const dis = getDistance(entity.position, position)
   return dis < distance ? entity : null
+}
+
+let _seed = 42
+export function random() {
+  _seed ^= _seed << 13
+  _seed ^= _seed >> 17
+  _seed ^= _seed >> 5
+  _seed = _seed < 0 ? ~_seed + 1 : _seed
+  return _seed / 2147483647
+}
+
+export function probaSeed(value) {
+  return random() < value
 }

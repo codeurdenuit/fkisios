@@ -5,7 +5,7 @@ import {
   getAngle,
   getGapAbs,
   randomBool
-} from '../function/function'
+} from '../tool/function'
 import { Vector2 } from 'three'
 
 export default class Ai {

@@ -1,8 +1,11 @@
 import Rapier from '@dimforge/rapier3d-compat'
-import { Object3D, AmbientLight, DirectionalLight, Vector2 } from 'three'
-import materialTree from './shader/tree'
-import { replaceMaterial } from './function/function'
-import Sound from './engine/sound'
+import Sound from '../engine/sound'
+import materialTree1 from '../shader/tree'
+import { replaceMaterial, probaSeed } from '../tool/function'
+import { Object3D, AmbientLight, DirectionalLight, Vector2, Color } from 'three'
+
+const materialTree2 = materialTree1.clone()
+materialTree2.color = new Color('#a2d1c3') //#c3a483//#e2d193
 
 export default class World extends Object3D {
   constructor(meshesSolid, meshesCollider, physic) {
@@ -32,7 +35,9 @@ export default class World extends Object3D {
 
   initVisual(meshes) {
     for (const mesh of meshes) {
-      if (mesh.name.includes('tree')) replaceMaterial(mesh, materialTree)
+      if (mesh.name.includes('tree')) {
+        replaceMaterial(mesh, probaSeed(0.8) ? materialTree1 : materialTree2)
+      }
       this.add(mesh)
     }
   }
@@ -59,20 +64,12 @@ export default class World extends Object3D {
   }
 
   update(dt, Player) {
-    const player = Player.instances[0]
-    if (player && player.active) {
-      this.dirLight.position.set(
-        player.position.x - 10,
-        20,
-        player.position.z + 10
-      )
-      this.dirLight.target.position.set(
-        player.position.x,
-        0,
-        player.position.z - 5
-      )
+    const pl = Player.instances[0]
+    if (pl && pl.active) {
+      this.dirLight.position.set(pl.position.x - 10, 20, pl.position.z + 10)
+      this.dirLight.target.position.set(pl.position.x, 0, pl.position.z - 5)
     }
-    const shader = materialTree.userData.shader
+    const shader = materialTree1.userData.shader
     if (shader) shader.uniforms.time.value += dt
   }
 

@@ -10,7 +10,7 @@ import {
   angleOfVector,
   getTarget,
   getAngle
-} from '../function/function'
+} from '../tool/function'
 
 const ATTACK = 1
 const SWORD = 2
@@ -76,7 +76,7 @@ export default class Player extends Entity {
     })
     mesh.getObjectByName('head').receiveShadow = false
     this.eyelid = mesh.getObjectByName('eyelid')
-    this.eyelid.userData = {timer:0,duration:1}
+    this.eyelid.userData = { timer: 0, duration: 1 }
     mesh.position.y -= 0.5
     mesh.scale.set(1.2, 1.2, 1.2)
     this.add(mesh)
@@ -496,10 +496,10 @@ export default class Player extends Entity {
   }
 
   initAnimations() {
-    this.loadAnim(ATTACK_LOADED, 'attack powerful', 2, true)
+    this.loadAnim(ATTACK_LOADED, 'attack4', 2, true)
     this.loadAnim(ATTACK, 'attack[1-3]', 0.3, true)
-    this.loadAnim(JUMP, 'backflip', 0.5, true)
-    this.loadAnim(DEAD, 'daying', 4, true)
+    this.loadAnim(JUMP, 'jump', 0.5, true)
+    this.loadAnim(DEAD, 'dead', 4, true)
     this.loadAnim(FALL, 'fall', 1.5)
     this.loadAnim(IDLE, 'idle', 3)
     this.loadAnim(IDLE_SHIELD, 'idle_shield', 3)
@@ -507,7 +507,7 @@ export default class Player extends Entity {
     this.loadAnim(PUSH, 'push', 1)
     this.loadAnim(ROLL, 'roll', 0.75, true)
     this.loadAnim(RUN, 'run', 0.5)
-    this.loadAnim(RUN_SHIELD, 'run shield', 0.5)
+    this.loadAnim(RUN_SHIELD, 'run_shield', 0.5)
     this.loadAnim(STRAF, 'straf', 0.5)
   }
 
@@ -542,3 +542,5 @@ export default class Player extends Entity {
     return Player.instances[index]
   }
 }
+
+//TODO https://projects.markkellogg.org/threejs/demo_trail_renderer.php

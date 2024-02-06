@@ -1,5 +1,5 @@
 import { LoopOnce } from 'three'
-import { randomInt, getSrc, findByName } from '../function/function'
+import { randomInt, getSrc, findByName } from '../tool/function'
 
 export default class Clip {
   animations = []

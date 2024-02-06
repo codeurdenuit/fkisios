@@ -1,4 +1,4 @@
-import { getSrc, randomInt, clamp1 } from '../function/function'
+import { getSrc, randomInt, clamp1 } from '../tool/function'
 
 export default class Sound {
   audios = []
@@ -24,8 +24,7 @@ export default class Sound {
     this.stop()
     const index = randomInt(0, this.audios.length - 1)
     this.audios[index].play()
-    if(volume!==undefined)
-    this.audios[index].volume = clamp1(volume)
+    if (volume !== undefined) this.audios[index].volume = clamp1(volume)
     this.current = this.audios[index]
   }
 }
