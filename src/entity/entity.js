@@ -2,7 +2,7 @@ import { Vector2, AnimationMixer, Object3D } from 'three'
 import Sound from '../engine/sound'
 import Anim from '../engine/animation'
 import Rapier from '@dimforge/rapier3d-compat'
-import { removeFromArray } from '../tool/function'
+import { removeFromArray, nearest } from '../tool/function'
 
 export default class Entity extends Object3D {
   static instances = []
@@ -144,5 +144,9 @@ export default class Entity extends Object3D {
 
   static getInstance(index) {
     return this.instances[index]
+  }
+
+  static nearest(position) {
+    return nearest(position, this.instances)
   }
 }

@@ -10,30 +10,31 @@ const keys = {
   'd':'right',
   'v':'attack',
   'b':'jump',
-  'm':'focus',
+  'm':'lock',
   'button_0':'attack',
   'button_1':'jump',
-  'button_7':'focus'
+  'button_7':'lock'
 }
 
 export default class Ctrl {
 
-  constructor(entity) {
-    this.active = false
-    this.angle = entity.rotation.y
-    this.axis = new Vector2()
-    this.focus = false
-    this.attack = false
-    this.magnitude = 1
-    this.jump = false
-    this.attackPowerful = false
-    this.attackTurbo = false
+  active = false
+  angle = 0
+  axis = new Vector2()
+  lock = false
+  attack = false
+  jump = false
+  attackLoaded = false
+  attackTurbo = false
 
-    this.pressed = {}
-    this.tempoPress = 0
-    this.countPress = 0
-    this.tempoCount = 0
-    this.previousRoll = false
+  pressed = {}
+  tempoPress = 0
+  countPress = 0
+  tempoCount = 0
+  previousJump = false
+
+  constructor(entity) {
+    this.angle = entity.rotation.y
 
     joypad.on('button_press', e => {
       this.pressed[keys[e.detail.buttonName]] = true
@@ -57,32 +58,25 @@ export default class Ctrl {
   compute(dt) {
     if(!this.active) return
     this.updateFocus()
-    this.updateRoll()
+    this.updateJump()
     this.updateAxis()
     this.updateAttack()
-    this.updateAttackPowerful(dt)
+    this.updateAttackLoaded(dt)
     this.updateAttackTurbo(dt)
     this.updateAngle()
   }
   updateFocus() {
-    this.focus = !!this.pressed.focus
+    this.lock = !!this.pressed.lock
   }
-  updateRoll() {
-    if(!this.previousRoll && this.pressed.jump ) {
-      this.jump = true //uniquement lors d'un relachement
-    } else {
-      this.jump = false
-    }
-
-    this.previousRoll = this.pressed.jump
+  updateJump() {
+    this.jump = (this.previousJump === false && this.pressed.jump === true) 
+    this.previousJump = this.pressed.jump
   }
   updateAxis() {
     if(joypad.instances[0]) {
       const axes = joypad.instances[0].axes
       this.axis.x = round(axes[0], 10)
       this.axis.y =  round(axes[1], 10)
-      this.magnitude = this.axis.lengthSq()
-      this.axis.normalize()
     } else {
       const pressed = this.pressed
       if(pressed.up && !pressed.down) {
@@ -100,7 +94,6 @@ export default class Ctrl {
         this.axis.x = 0
       }
       this.axis.normalize()
-      this.magnitude = this.axis.lengthSq()
     }
   }
 
@@ -108,15 +101,15 @@ export default class Ctrl {
     this.attack = !!this.pressed.attack
   }
 
-  updateAttackPowerful(dt) {
+  updateAttackLoaded(dt) {
     if(this.pressed.attack) {
       this.tempoPress += dt
       if(this.tempoPress > 1) {
-        this.attackPowerful = true
+        this.attackLoaded = true
       }
     }else {
       this.tempoPress = 0
-      this.attackPowerful = false
+      this.attackLoaded = false
     }
   }
 
@@ -134,7 +127,7 @@ export default class Ctrl {
 
   updateAngle() {
     const axis = this.axis
-    if(axis.length()!==0&&this.focus===false ) {
+    if(axis.length()!==0 ) {
       this.angle = Math.atan2(-axis.y, axis.x) + Math.PI/2
     }
   }
@@ -145,6 +138,10 @@ export default class Ctrl {
 
   enable() {
     this.active = true
+  }
+
+  get magnitude() {
+    return this.axis.length()
   }
 
   get moving() {

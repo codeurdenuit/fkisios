@@ -29,7 +29,7 @@ export default class Mob1 extends Entity {
 
   constructor(mesh, origin, physic) {
     super(mesh, origin, physic)
-    this.ctrl = new Ai(4, origin, 0.7)
+    this.ctrl = new Ai(4, origin.position, 0.7)
     this.initVisual(mesh)
     this.initAnimations()
     this.initSounds()

@@ -64,7 +64,7 @@ export default class World extends Object3D {
   }
 
   update(dt, Player) {
-    const pl = Player.instances[0]
+    const pl =Player.getInstance(0)
     if (pl && pl.active) {
       this.dirLight.position.set(pl.position.x - 10, 20, pl.position.z + 10)
       this.dirLight.target.position.set(pl.position.x, 0, pl.position.z - 5)

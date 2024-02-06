@@ -6,47 +6,56 @@ import {
   getGapAbs,
   randomBool
 } from '../tool/function'
+
+const SCOPE = 4.5
+const FOV = Math.PI * 0.8
+const SENSITIV = 2
+const VIEW = 5
+const HITBOX = 1.7
+
 import { Vector2 } from 'three'
 
 export default class Ai {
-  static distanceMax = 4
-  static viewDistance = 5
-  static earDistance = 2
-  static viewFov = Math.PI * 0.8
-  static contactDistance = 1.7
+  origin = null
+  angle = 0
+  time = 0
+  outOfScope = false
+  axis = new Vector2()
+  focus = false
+  attack = false
 
-  constructor(tempo = 4, origin, motionProb = 0.8) {
-    this.origin = origin
+  constructor(tempo = 4, position, motionProb = 0.8) {
+    this.origin = position
     this.motionProb = motionProb
-    this.angle = 0
     this.tempo = tempo
-    this.time = 0
-    ;(this.axis = new Vector2()), (this.outOfBounds = false)
-    this.focus = false
-    this.attack = false
   }
 
   compute(dt, Player, position) {
-    this.time += dt
-    //const entity = nearest(position, Player.instances)
-    const entity = Player.getInstance(0)
-    if (entity) {
-      this.focus = this.isVisible(entity.position, position)
-    } else {
-      this.focus = false
-    }
+    const player = Player.getInstance(0)
 
+    this.time += dt
     this.attack = false
+    this.focus = false
+
+    if (player) {
+      this.updateFocus(player.position, position)
+    }
     if (this.focus) {
-      this.goToPosition(entity.position, position)
-      this.computeAttack(dt, entity.position, position)
+      this.computeAttack(player.position, position)
+      if (!this.attack) {
+        this.goToPosition(player.position, position)
+      }
     } else {
       this.randomMove(position)
     }
   }
 
+  updateFocus(targetPosition, position) {
+    this.focus = this.isVisible(targetPosition, position)
+  }
+
   randomMove(position) {
-    if (this.time >= this.tempo && !this.outOfBounds) {
+    if (this.time >= this.tempo && !this.outOfScope) {
       this.time = 0
       if (Math.random() < this.motionProb) {
         this.axis.x = randomInt(-1, 1)
@@ -56,47 +65,42 @@ export default class Ai {
         this.axis.set(0, 0)
       }
     }
-    if (
-      getDistance(position, this.origin) > Ai.distanceMax &&
-      !this.outOfBounds
-    ) {
+    if (getDistance(position, this.origin) > SCOPE && !this.outOfScope) {
       this.axis.x = this.origin.x - position.x
       this.axis.y = this.origin.z - position.z
       this.axis.normalize()
-      this.outOfBounds = true
+      this.outOfScope = true
     } else if (
-      getDistance(position, this.origin) < Ai.distanceMax * 0.8 &&
-      this.outOfBounds
+      getDistance(position, this.origin) < SCOPE * 0.8 &&
+      this.outOfScope
     ) {
-      this.outOfBounds = false
+      this.outOfScope = false
     }
-
     if (this.axis.lengthSq() > 0) {
       this.angle = angleOfVector(this.axis)
     }
   }
 
   goToPosition(point, position) {
-    this.axis.x = 0
-    this.axis.y = 0
-    if (this.attack) return
     const distance = getDistance(point, position)
     this.angle = getAngle(point, position)
-    if (distance > Ai.contactDistance) {
+    if (distance > HITBOX) {
       this.axis.x = Math.cos(this.angle - Math.PI / 2)
       this.axis.y = Math.sin(this.angle + Math.PI / 2)
+    } else {
+      this.axis.x = 0
+      this.axis.y = 0
     }
   }
 
-  computeAttack(dt, point, position) {
+  computeAttack(point, position) {
     if (this.time > this.tempo) {
       const distance = getDistance(point, position)
-      if (distance < Ai.contactDistance) {
+      if (distance < HITBOX) {
         this.time = 0
         this.attack = randomBool(0.6)
       }
     }
-    this.time += dt
   }
 
   isVisible(point, position) {
@@ -104,12 +108,11 @@ export default class Ai {
     const angle1 = getAngle(point, position)
     const angle2 = this.angle
     const gap = getGapAbs(angle1, angle2)
-    if (distance < Ai.earDistance) return true
-    return gap < Ai.viewFov && distance < Ai.viewDistance
+    if (distance < SENSITIV) return true
+    return gap < FOV && distance < VIEW
   }
 
   get moving() {
     return !!this.axis.length()
   }
-
 }

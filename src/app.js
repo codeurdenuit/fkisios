@@ -47,7 +47,7 @@ const graphic = new Graphic(scene, camera, focus)
 graphic.onUpdate((dt) => {
   physic.step()
   Player.update(dt, Mob1, Grass, Box, Area)
-  Mob1.update(dt, Player) //instances of MasterClass
+  Mob1.update(dt, Player)
   Rubis.update(dt, Player)
   Heart.update(dt, Player)
   Block.update(Player)

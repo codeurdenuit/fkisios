@@ -131,7 +131,7 @@ export default class Player extends Entity {
   }
 
   updateFocusSound() {
-    if (this.ctrl.focus) {
+    if (this.ctrl.lock) {
       if (!this.isShield) this.sound(SHIELD)
     } else {
       if (this.isShield) this.sound(REST)
@@ -139,7 +139,7 @@ export default class Player extends Entity {
   }
 
   updateFocused(Mob) {
-    if (this.ctrl.focus) this.focused = getTarget(this.position, Mob, 4)
+    if (this.ctrl.lock) this.focused = getTarget(this.position, Mob, 4)
     else this.focused = null
   }
 
@@ -150,7 +150,7 @@ export default class Player extends Entity {
 
   updateAnimAttack(Mob, Grass, Box) {
     if (this.isAttack) return
-    if (this.ctrl.attackPowerful) {
+    if (this.ctrl.attackLoaded) {
       this.anim(ATTACK_LOADED)
       this.sound(YELL)
       this.onAnimHalf(() => {
@@ -227,14 +227,18 @@ export default class Player extends Entity {
     this.speed = Math.min(this.speed + dt * 6, maxVelosity)
     this.positionVel.x = this.ctrl.axis.x * this.speed
     this.positionVel.y = this.ctrl.axis.y * this.speed
-    if (this.ctrl.focus) this.rotationVel = 0
+    if (this.ctrl.lock) {
+      this.rotationVel = 0
+    }else {
+      this.rotationVel = getGap(this.ctrl.angle, this.rotation.y) * dt * 10
+    }
     if (this.focused)
       this.rotation.y = getAngle(this.focused.position, this.position)
-    else this.rotationVel = getGap(this.ctrl.angle, this.rotation.y) * dt * 10
+
   }
 
   updateAnimWalk() {
-    if (this.ctrl.focus) {
+    if (this.ctrl.lock) {
       switch (this.getMoveDirection()) {
         case BACKWARD:
           if (!this.anim(RUN_SHIELD, -1)) return
@@ -307,7 +311,7 @@ export default class Player extends Entity {
   }
 
   updateAnimIdle() {
-    if (this.ctrl.focus) {
+    if (this.ctrl.lock) {
       this.anim(IDLE_SHIELD)
     } else {
       this.anim(IDLE)
@@ -445,6 +449,10 @@ export default class Player extends Entity {
       c.y === 0 && -Math.sign(c.x) === Math.sign(this.positionVel.x)
     if (!pushedY && !pushedX) return false
     return true
+  }
+
+  set ground(value) {
+    this.groundType = value
   }
 
   updateGround(Area) {
