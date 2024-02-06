@@ -10,6 +10,10 @@ import {
 
 export default class Particles extends Points {
   static count = 30
+  velocities = []
+  clock = new Clock()
+  lifeOrigin = 1
+  life = 1
 
   constructor(position) {
     super()
@@ -17,18 +21,11 @@ export default class Particles extends Points {
     this.scale.set(2, 2, 2)
     this.position.y += (Math.random() - 0.5) * 0.5
     const positions = Particles.randVector3Array()
-    this.velocities = Particles.randVector3Array(1, 1, 0.0)
-    this.aceleration = Particles.randVector3Array(1, 1, 0.0)
-
+    this.velocities = Particles.randVector3Array(1, 1, 0)
+    const posAttribut = new Float32BufferAttribute(positions, 3)
     this.geometry = new BufferGeometry()
-    this.geometry.setAttribute(
-      'position',
-      new Float32BufferAttribute(positions, 3)
-    )
-    this.material = new PointsMaterial({ color: 0xffffff, size: 0.16, depthTest: false })
-    this.clock = new Clock()
-    this.lifeOrigin = 1
-    this.life = this.lifeOrigin
+    this.geometry.setAttribute('position', posAttribut)
+    this.material = new PointsMaterial({ size: 0.16, depthTest: false })
     this.loop = this.loop.bind(this)
     this.renderOrder = 1
     this.loop()
@@ -39,16 +36,14 @@ export default class Particles extends Points {
     this.life -= dt
     const count = Particles.count
     const positions = this.geometry.attributes.position.array
+    const t = this.life / this.lifeOrigin
     for (let i = 0; i < count; i++) {
-      positions[i * 3] +=
-        this.velocities[i * 3] * dt * Math.pow(this.life / this.lifeOrigin, 2)
-      positions[i * 3 + 1] +=
-        this.velocities[i * 3 + 1] * dt * Math.pow(this.life / this.lifeOrigin, 2)
-      positions[i * 3 + 2] +=
-        this.velocities[i * 3 + 2] * dt * Math.pow(this.life / this.lifeOrigin, 2)
+      positions[i * 3] += this.velocities[i * 3] * dt * Math.pow(t, 2)
+      positions[i * 3 + 1] += this.velocities[i * 3 + 1] * dt * Math.pow(t, 2)
+      positions[i * 3 + 2] += this.velocities[i * 3 + 2] * dt * Math.pow(t, 2)
     }
     this.geometry.attributes.position.needsUpdate = true
-    this.material.size *= Math.pow(this.life / this.lifeOrigin, 2)
+    this.material.size *= Math.pow(t, 2)
     if (this.life <= 0 || this.material.size < 0.01) {
       this.autoDelete()
     } else {

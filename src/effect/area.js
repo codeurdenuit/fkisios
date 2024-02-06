@@ -13,7 +13,7 @@ export default class Area extends Box3 {
   update(player) {
     const col = this.containsPoint(player.position)
     if (col) {
-      player.groundType = this.type
+      player.ground = this.type
     }
   }
 }
