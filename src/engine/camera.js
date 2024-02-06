@@ -7,7 +7,7 @@ export default class CameraPlayer extends PerspectiveCamera {
 
 	constructor(Player) {
 		super(40, innerWidth / innerHeight)
-    const player = Player.instances[0]
+    const player = Player.getInstance(0)
     this.position.copy(player.position)
     this.position.x += 0
     this.position.y += 1.2
@@ -19,7 +19,7 @@ export default class CameraPlayer extends PerspectiveCamera {
 	}
 
   update(Player) {
-    const player = Player.instances[0]
+    const player = Player.getInstance(0)
     if(!player || !player.active) return
     this.position.set(
       player.position.x,

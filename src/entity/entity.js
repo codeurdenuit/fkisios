@@ -5,6 +5,7 @@ import Rapier from '@dimforge/rapier3d-compat'
 import { removeFromArray } from '../tool/function'
 
 export default class Entity extends Object3D {
+  static instances = []
   static hitAngle = Math.PI / 2
   static hitRange = 1.8
   sounds = new Map()
@@ -22,6 +23,7 @@ export default class Entity extends Object3D {
     this.hp = 3
     this.position.copy(origin.position)
     this.rotation.copy(origin.rotation)
+    this.constructor.instances.push(this)
   }
 
   update(...args) {
@@ -61,6 +63,14 @@ export default class Entity extends Object3D {
   get isFall() {
     const velocity = this.rigidBody.linvel()
     return velocity.y < -2.5
+  }
+
+  get active() {
+    return this.ctrl.active
+  }
+
+  set active(value) {
+    this.ctrl.active = value
   }
 
   loadSound(key, src, vol = 1, loop = false) {
@@ -121,5 +131,18 @@ export default class Entity extends Object3D {
     this.physic.removeCollider(this.collider)
     this.physic.removeRigidBody(this.rigidBody)
     this.removeFromParent()
+  }
+
+  static onDead(callback) {
+    this.cbDead = callback
+  }
+
+  static update(...args) {
+    const instances = this.instances//is ChildClass has not instances, so root instances
+    for (const instance of instances) instance.update(...args)
+  }
+
+  static getInstance(index) {
+    return this.instances[index]
   }
 }

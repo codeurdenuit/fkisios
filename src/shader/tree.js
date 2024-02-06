@@ -29,8 +29,6 @@ material.onBeforeCompile = function (shader) {
       mvPosition.z +=  0.01*f1*cos(transformed.y*10.0+1.0)*(2.0-transformed.y);
       mvPosition.x +=  0.01*f2*cos(transformed.y*10.0+1.0)*(2.0-transformed.y);
     }
-
-  
     gl_Position = projectionMatrix * mvPosition;
     `
   )

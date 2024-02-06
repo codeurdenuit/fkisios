@@ -172,3 +172,7 @@ export function random() {
 export function probaSeed(value) {
   return random() < value
 }
+
+export function getRubisValue(mesh, value) {
+  return value ? value : mesh.isRootName('rubisB') ? 10 : 1
+}

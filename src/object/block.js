@@ -35,7 +35,7 @@ export default class Block extends Mesh {
   }
 
   update(Player) {
-    const player = Player.instances[0]
+    const player = Player.getInstance(0)
     this.position.copy(this.rigidBody.translation())
     this.rigidBody.setEnabledTranslations(true, true, true)
     this.collision = false

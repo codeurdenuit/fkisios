@@ -29,7 +29,7 @@ export default class Ai {
   compute(dt, Player, position) {
     this.time += dt
     //const entity = nearest(position, Player.instances)
-    const entity = Player.instances[0]
+    const entity = Player.getInstance(0)
     if (entity) {
       this.focus = this.isVisible(entity.position, position)
     } else {

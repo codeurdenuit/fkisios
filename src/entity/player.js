@@ -66,7 +66,6 @@ export default class Player extends Entity {
     this.initVisual(mesh)
     this.initAnimations()
     this.initSounds()
-    Player.instances.push(this)
   }
 
   initVisual(mesh) {
@@ -432,6 +431,10 @@ export default class Player extends Entity {
     return this.isAnim(IDLE_SHIELD) || !this.isAnim(RUN_SHIELD)
   }
 
+  get focus() {
+    return this.focused
+  }
+
   get isPushing() {
     const c = this.contact
     if (!c) return false
@@ -442,18 +445,6 @@ export default class Player extends Entity {
       c.y === 0 && -Math.sign(c.x) === Math.sign(this.positionVel.x)
     if (!pushedY && !pushedX) return false
     return true
-  }
-
-  get active() {
-    return this.ctrl.active
-  }
-
-  set active(value) {
-    this.ctrl.active = value
-  }
-
-  get focus() {
-    return this.focused
   }
 
   updateGround(Area) {
@@ -533,14 +524,6 @@ export default class Player extends Entity {
     this.loadSound(PUSH, 'sound/push.wav', 0.8, true)
   }
 
-  static update(dt, Mob1, Grass, Box, Area) {
-    for (const player of Player.instances)
-      player.update(dt, Mob1, Grass, Box, Area)
-  }
-
-  static getInstance(index) {
-    return Player.instances[index]
-  }
 }
 
 //TODO https://projects.markkellogg.org/threejs/demo_trail_renderer.php

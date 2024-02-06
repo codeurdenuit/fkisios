@@ -30,7 +30,7 @@ export default class Focus extends Object3D {
   }
 
   update(dt, Player, camera) {
-    const player = Player.instances[0]
+    const player = Player.getInstance(0)
     if (player && player.focus) {
       if (this.previousFocus !== player.focus) {
         this.timer = 0

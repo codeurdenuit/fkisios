@@ -60,7 +60,7 @@ export default class Grass extends Mesh {
   }
 
   static update(dt, Player) {
-    const player = Player.instances[0]
+    const player = Player.getInstance(0)
     const shaderGrass = materialGrass.userData.shader
     const shaderPlant = materialPlant.userData.shader
     if (!player || !shaderGrass || !shaderPlant) return

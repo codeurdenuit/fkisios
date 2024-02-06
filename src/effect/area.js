@@ -7,7 +7,7 @@ export default class Area extends Box3 {
     this.type = mesh.name.split('_')[1]
     this.name = mesh.name
     this.copy(mesh.geometry.boundingBox)
-    Area.instances.push(this)
+    this.constructor.instances.push(this)
   }
 
   update(player) {

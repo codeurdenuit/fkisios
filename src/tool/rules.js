@@ -6,7 +6,7 @@ export default class Rules {
   constructor(Player, Block, Box, Area, world, menu) {
     const sound = new Audio('sound/secret.wav')
     const soundFall = new Audio('sound/fall.wav')
-    const player = Player.instances[0]
+    const player = Player.getInstance(0)
 
     this.list.push(() => {
       const box = findInstanceByName('box_A_cast_receive', Box)

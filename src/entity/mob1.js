@@ -20,7 +20,6 @@ const VELOCITY = 0.4
 const DEMAGE = 1.5
 
 export default class Mob1 extends Entity {
-  static instances = []
   static hitAngle = Math.PI / 2
   static hitRange = 1.8
   static cbDead = null
@@ -30,11 +29,10 @@ export default class Mob1 extends Entity {
 
   constructor(mesh, origin, physic) {
     super(mesh, origin, physic)
-    this.ctrl = new Ai(4, origin, 0.5)
+    this.ctrl = new Ai(4, origin, 0.7)
     this.initVisual(mesh)
     this.initAnimations()
     this.initSounds()
-    Mob1.instances.push(this)
   }
 
   initVisual(mesh) {
@@ -148,7 +146,7 @@ export default class Mob1 extends Entity {
   }
 
   updateDistance(Player) {
-    const player = Player.instances[0]
+    const player = Player.getInstance(0)
     if (player) {
       this.distance = getDistance(player.position, this.position)
     }
@@ -211,11 +209,5 @@ export default class Mob1 extends Entity {
     this.loadSound(DEAD, 'sound/death.wav')
   }
 
-  static onDead(callback) {
-    this.cbDead = callback
-  }
 
-  static update(dt, Player) {
-    for (const mob of Mob1.instances) mob.update(dt, Player)
-  }
 }

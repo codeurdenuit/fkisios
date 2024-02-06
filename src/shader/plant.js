@@ -43,7 +43,6 @@ material.onBeforeCompile = function (shader) {
   material.userData.shader = shader
 }
 
-// Make sure WebGLRenderer doesnt reuse a single program
 material.customProgramCacheKey = function () {
   return 2
 }

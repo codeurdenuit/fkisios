@@ -4,7 +4,7 @@ import {createElement} from '../tool/function'
 export default class UI  {
 
   constructor(Player) {
-    const player = Player.instances[0]
+    const player = Player.getInstance(0)
     const hp = createElement('div', 'hp')
     for(let i=0; i<player.hp;  i++) 
     hp.appendChild(createElement('div', `heart p${i}`))
@@ -21,7 +21,7 @@ export default class UI  {
   }
 
   update(Player) {
-    const player = Player.instances[0]
+    const player = Player.getInstance(0)
     if(!player) return
     this.setRubies(player.rubies)
     this.setHP(player.hp)

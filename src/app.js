@@ -47,7 +47,7 @@ const graphic = new Graphic(scene, camera, focus)
 graphic.onUpdate((dt) => {
   physic.step()
   Player.update(dt, Mob1, Grass, Box, Area)
-  Mob1.update(dt, Player)
+  Mob1.update(dt, Player) //instances of MasterClass
   Rubis.update(dt, Player)
   Heart.update(dt, Player)
   Block.update(Player)
@@ -63,14 +63,15 @@ graphic.onUpdate((dt) => {
 menu.onStart(() => {
   menu.hide()
   world.start()
-  Player.instances[0].active = true
+  Player.getInstance(0).active = true
 })
 
 Grass.onCut((pos) => {
+  const player = Player.getInstance(0)
   if (proba(0.05))
     scene.add(new Rubis(ast.meshesRubis[0], spreadAround(pos, 1, 1)))
 
-  if (proba(0.05) && Player.instances[0].hp < 4)
+  if (proba(0.05) && player.hp < 4)
     scene.add(new Heart(ast.meshesHeart[0], spreadAround(pos, 1, 1)))
 })
 

@@ -29,7 +29,6 @@ export default class Mob2 extends Entity {
     this.initVisual(mesh)
     this.initAnimations()
     this.initSounds()
-    Mob2.instances.push(this)
   }
 
   initVisual(mesh) {
@@ -100,7 +99,7 @@ export default class Mob2 extends Entity {
   }
 
   updateDistance(Player) {
-    const player = Player.instances[0]
+    const player = Player.getInstance(0)
     if (player) {
       this.distance = getDistance(player.position, this.position)
     }
@@ -162,11 +161,4 @@ export default class Mob2 extends Entity {
     this.loadSound(DEAD, 'sound/death.wav')
   }
 
-  static onDead(callback) {
-    this.cbDead = callback
-  }
-
-  static update(dt, Player) {
-    for (const mob of Mob2.instances) mob.update(dt, Player)
-  }
 }
