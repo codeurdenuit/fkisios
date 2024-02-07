@@ -27,6 +27,7 @@ export default class Graphic extends WebGLRenderer {
     this.camera = camera
     this.scene.background = new TextureLoader().load('sky.jpg')
     this.fx = fx
+    window.addEventListener('resize', this.resize.bind(this), false)
 
     this.composer = new EffectComposer(this)
     const renderPass = new RenderPass(scene, camera)
@@ -126,5 +127,11 @@ export default class Graphic extends WebGLRenderer {
 
   onUpdate(callback) {
     this.cbUpdate = callback
+  }
+
+  resize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight
+    this.camera.updateProjectionMatrix()
+    this.setSize(window.innerWidth, window.innerHeight)
   }
 }
