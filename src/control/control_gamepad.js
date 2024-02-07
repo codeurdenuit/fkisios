@@ -3,20 +3,20 @@ import {round } from '../tool/function'
 import 'joypad.js'
 
 
-const keys = {
+export const keys = {
   'z':'up',
   's':'down',
   'q':'left',
   'd':'right',
-  'v':'attack',
-  'b':'jump',
-  'm':'lock',
+  'l':'attack',
+  'm':'jump',
+  'shift':'lock',
   'button_0':'attack',
   'button_1':'jump',
   'button_7':'lock'
 }
 
-export default class Ctrl {
+export class Ctrl {
 
   active = false
   angle = 0
@@ -46,11 +46,11 @@ export default class Ctrl {
     })
 
     document.addEventListener('keydown', e=>{
-      this.pressed[keys[e.key]] = true
+      this.pressed[keys[e.key.toLowerCase()]] = true
     })
 
     document.addEventListener('keyup', e=>{
-      this.pressed[keys[e.key]] = false
+      this.pressed[keys[e.key.toLowerCase()]] = false
       if(keys[e.key] === 'attack') this.countPress++
     })
   }

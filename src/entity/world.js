@@ -13,7 +13,7 @@ export default class World extends Object3D {
     this.initPhysic(physic, meshesCollider)
     this.initVisual(meshesSolid)
     this.initLights()
-    const ambient = new Sound('sound/ambient.mp3', 0.5, true)
+    const ambient = new Sound('sound/ambient.mp3', 0.3, true)
     const music = new Sound('sound/AddingTheSun.mp3', 0.4, true)
     ambient.play()
     music.play()

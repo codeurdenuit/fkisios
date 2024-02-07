@@ -15,7 +15,7 @@ import Graphic from './engine/graphic'
 import Camera from './engine/camera'
 import Rules from './tool/rules'
 import UI from './ui/ui'
-import Menu from './ui/menu'
+import Home from './ui/home'
 import loadAssets from './tool/loader'
 import { clone, spreadAround, proba } from './tool/function'
 
@@ -40,8 +40,8 @@ scene.add(world)
 const camera = new Camera(Player)
 const focus = new Focus()
 const ui = new UI(Player)
-const menu = new Menu()
-const rules = new Rules(Player, Block, Box, Area, world, menu)
+const home = new Home()
+const rules = new Rules(Player, Block, Box, Area, world, home)
 const graphic = new Graphic(scene, camera, focus)
 
 graphic.onUpdate((dt) => {
@@ -60,8 +60,8 @@ graphic.onUpdate((dt) => {
   ui.update(Player)
 })
 
-menu.onStart(() => {
-  menu.hide()
+home.onStart(() => {
+  home.hide()
   world.start()
   Player.getInstance(0).active = true
 })

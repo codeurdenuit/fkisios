@@ -1,5 +1,5 @@
 import { Vector3, PointLight } from 'three'
-import Ctrl from '../control/control_gamepad'
+import { Ctrl } from '../control/control_gamepad'
 import Entity from './entity'
 import Particles from '../effect/particles'
 import {
@@ -432,7 +432,7 @@ export default class Player extends Entity {
   }
 
   get isShield() {
-    return this.isAnim(IDLE_SHIELD) || !this.isAnim(RUN_SHIELD)
+    return this.isAnim(IDLE_SHIELD) || this.isAnim(RUN_SHIELD) || this.isAnim(STRAF)
   }
 
   get focus() {

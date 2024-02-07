@@ -4,6 +4,7 @@ body {
   overflow: hidden;
 }
 
+
 .hp {
   display: flex;
   position: absolute;
@@ -129,6 +130,15 @@ body {
   }
 }
 
+.container {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .menu {
   display: flex;
   position: absolute;
@@ -140,7 +150,7 @@ body {
   right: 0;
   width: 35rem;
   height: 100%;
-  padding: 3rem 3rem 3rem 7rem;
+  padding: 0.5rem 2rem 2rem 5rem;
   background: linear-gradient(
     90deg,
     rgba(221, 162, 37, 0) 0%,
@@ -149,13 +159,17 @@ body {
   color: white;
 }
 
-.menu.hide {
+.container.hide {
   display: none;
 }
 
 .title {
   font-size: 4rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
+}
+
+.tech {
+  width: 10rem;
 }
 
 .desc {
@@ -166,16 +180,82 @@ body {
   text-align: end;
 }
 
+.config {
+  display: inline-block;
+  position: relative;
+  width: 22.5rem;
+  height: 20rem;
+  background: url('gamepad.png');
+}
+
 .button {
-  padding: 1rem 5rem;
+  display: inline-block;
+  padding: 1rem 0;
+  width: 16rem;
   margin-bottom: 2rem;
   background-color: #2054b8;
   border-radius: 1rem;
   font-size: 2rem;
   border: solid;
   cursor: pointer;
+  text-align: center;
+  transform-origin: center;
 }
 
-.button:last-child {
-  background: #d44c1e;
+.button:hover {
+  scale: 1.05;
 }
+
+.start {
+  position: absolute;
+  top: 60%;
+  left: calc(50% - 8rem)
+}
+
+input {
+  width: 1rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  border: solid orange ;
+}
+
+.key {
+  position: absolute;
+}
+
+.up {
+  top: 3rem;
+  left: 2.4rem;
+}
+.down {
+  top: 9rem;
+  left: 2rem;
+}
+.left {
+  top: 5.8rem;
+  left: 0rem;
+}
+.right {
+  top: 5.8rem;
+  left: 5rem;
+}
+.attack {
+  top: 11rem;
+  left: 13rem;
+}
+.jump {
+  top: 5rem;
+  left: 18rem;
+}
+.lock {
+  top: 0.5rem;
+  left: 19.5rem;
+}
+
+.lock input {
+  width: 2rem;
+}
+
+
+
+

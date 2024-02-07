@@ -112,15 +112,6 @@ export function findByName(name, list) {
   return list.find((a) => name === a.name)
 }
 
-export function createElement(tag, className, text, onclick) {
-  const element = document.createElement(tag)
-  element.className = className
-  if (text) tag === 'img' ? (element.src = text) : (element.textContent = text)
-  if (onclick)
-    tag === 'a' ? (element.href = onclick) : (element.onclick = onclick)
-  return element
-}
-
 export function clone(mesh) {
   const cloned = cloneSkeleton(mesh)
   cloned.animations = mesh.animations
@@ -175,4 +166,26 @@ export function probaSeed(value) {
 
 export function getRubisValue(mesh, value) {
   return value ? value : mesh.isRootName('rubisB') ? 10 : 1
+}
+
+export function createElement(tag, className, value, onclick) {
+  const element = document.createElement(tag)
+  element.className = className
+  if (value) {
+    if (tag === 'img') element.src = value
+    else if (tag === 'input') element.value = value
+    else element.textContent = value
+  }
+  if (onclick)
+    tag === 'a' ? (element.href = onclick) : (element.onclick = onclick)
+  return element
+}
+
+export function drawInput(name, value, callback) {
+  const container = createElement('div', `key ${name}`)
+  const input = createElement('input', '', value)
+  input.id = `${value}_${name}`
+  input.addEventListener('input', callback)
+  container.appendChild(input)
+  return container
 }
