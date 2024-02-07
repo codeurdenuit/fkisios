@@ -386,7 +386,7 @@ export default class Player extends Entity {
   }
 
   updatePropsPush(dt) {
-    const maxVelosity = VELOCITY * this.ctrl.magnitude
+    const maxVelosity = VELOCITY*0.66 * this.ctrl.magnitude
     this.speed = Math.min(this.speed + dt * 6, maxVelosity)
     this.positionVel.x = this.ctrl.axis.x * this.speed
     this.positionVel.y = this.ctrl.axis.y * this.speed

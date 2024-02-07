@@ -1,15 +1,20 @@
 import { findInstanceByName } from './function'
+import Sound from '../engine/sound'
+
 
 export default class Rules {
   list = []
   cbOver = null
 
-  constructor(Player, Block, Box, Area, world, menu) {
-    console.log('new instance Rules')
-    const sound = new Audio('sound/secret.wav')
-    const soundFall = new Audio('sound/fall.wav')
+  constructor(Player, Block, Box, Area, Mob, world, menu) {
+    const sound = new Sound('sound/secret.wav')
+    const soundFall = new Sound('sound/fall.wav')
+    const soundDanger = new Sound('sound/danger.mp3',0, true)
+    soundDanger.play()
+    
     const player = Player.getInstance(0)
 
+    /////// OPEN THE WAY /////////////////
     this.list.push(() => {
       const box = findInstanceByName('box_A_cast_receive', Box)
       if (!box) {
@@ -18,6 +23,18 @@ export default class Rules {
       }
     })
 
+    /////// PLAYER DEAD /////////////////
+    let t0 = 0
+    this.list.push((dt) => {
+      if (!Player.getInstance(0)) {
+        if ((t0 += dt) > 2) {
+          soundDanger.stop()
+          this.gameover()
+        }
+      }
+    })
+
+    /////// CAVE LIGHT /////////////////
     const block = findInstanceByName('block_cast_receive', Block)
     const area = findInstanceByName('area_trigger', Area)
     let t1 = 0
@@ -32,6 +49,7 @@ export default class Rules {
       }
     })
 
+    /////// FALL INTO THE VOID /////////////////
     let t2 = 0
     this.list.push((dt) => {
       if (player.position.y < -5) {
@@ -40,20 +58,21 @@ export default class Rules {
           soundFall.play()
         }
         if ((t2 += dt) > 1) {
-          this.cbOver()
+          soundFall.stop()
+          this.gameover()
         }
       } else {
         t2 = 0
       }
     })
 
+    /////// END GAME /////////////////
     let t3 = 0
     const areaEnd = findInstanceByName('area_wood_end', Area)
     this.list.push((dt) => {
       if (!player.ctrl.active && !menu.displayed) {
         if ((t3 += dt) > 1.5) {
-          console.log('call over')
-          this.cbOver()
+          this.gameover()
         }
       } else if (areaEnd.containsPoint(player.position)) {
         player.ctrl.disable()
@@ -64,6 +83,7 @@ export default class Rules {
       }
     })
 
+    /////// PUSH BLOCK TO PASS /////////////////
     let t4 = 0
     this.list.push((dt) => {
       if (player.position.z < -18 && player.position.z > -48) {
@@ -77,6 +97,27 @@ export default class Rules {
       world.ambient.color.setRGB(1 - 0.8 * t4, 1 - 0.8 * t4, 1 - 0.6 * t4)
       world.dirLight.intensity = 4 - 0.5 * t4
     })
+
+    ///////  SOUND MOBS /////////////////
+    this.list.push((dt) => {
+      const mob = Mob.nearest(player.position)
+      if(mob && mob.distance<7) {
+        const factor = (1-mob.distance/7)
+        const dv1=(0.8*factor-soundDanger.volume)*dt
+        soundDanger.volume = soundDanger.volume+dv1
+        const dv2=(0.4*factor-world.volume)*dt
+        world.volume = world.volume+dv2
+      } else {
+        const dv1=(0-soundDanger.volume)*dt
+        soundDanger.volume = soundDanger.volume+dv1
+        const dv2=(0.4-world.volume)*dt
+        world.volume = world.volume+dv2
+      }
+    })
+  }
+
+  gameover() {
+    this.cbOver()
   }
 
   onGameover(callback) {

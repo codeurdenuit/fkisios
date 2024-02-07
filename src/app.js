@@ -40,7 +40,7 @@ function main() {
   const camera = new Camera(Player)
   const focus = new Focus()
   const ui = new UI(Player)
-  const rules = new Rules(Player, Block, Box, Area, world, home)
+  const rules = new Rules(Player, Block, Box, Area, Mob1, world, home)
   const graphic = new Graphic(scene, camera, focus)
 
   graphic.onUpdate((dt) => {
@@ -96,7 +96,7 @@ function main() {
     cleanGame(Classes, focus, world, graphic, ui)
     main()
   })
-  
+
   home.show()
   graphic.start()
 }

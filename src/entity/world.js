@@ -5,7 +5,7 @@ import { replaceMaterial, probaSeed } from '../tool/function'
 import { Object3D, AmbientLight, DirectionalLight, Vector2, Color } from 'three'
 
 const materialTree2 = materialTree1.clone()
-materialTree2.color = new Color('#a2d1c3') //#c3a483//#e2d193
+materialTree2.color = new Color('#a2d1c3')
 
 export default class World extends Object3D {
   colliders = []
@@ -64,13 +64,13 @@ export default class World extends Object3D {
 
   initSounds() {
     this.soundAmbient = new Sound('sound/ambient.mp3', 0.3, true)
-    this.soundMusic  = new Sound('sound/AddingTheSun.mp3', 0.4, true)
-    this.ambient.play()
-    this.music.play()
+    this.soundMusic = new Sound('sound/AddingTheSun.mp3', 0.4, true)
+    this.soundAmbient.play()
+    this.soundMusic.play()
   }
 
   update(dt, Player) {
-    const pl =Player.getInstance(0)
+    const pl = Player.getInstance(0)
     if (pl && pl.active) {
       this.dirLight.position.set(pl.position.x - 10, 20, pl.position.z + 10)
       this.dirLight.target.position.set(pl.position.x, 0, pl.position.z - 5)
@@ -80,17 +80,27 @@ export default class World extends Object3D {
   }
 
   playSound() {
-    if(!this.soundAmbient.isPlaying) {
+    if (!this.soundMusic.isPlaying) {
       this.soundAmbient.play()
       this.soundMusic.play()
     }
   }
 
   delete() {
-      this.clear()
-      this.removeFromParent()
-      for(const col of this.colliders)
-        this.physic.removeCollider(col)
-      this.colliders = []
+    this.soundAmbient.stop()
+    this.soundMusic.stop()
+    this.clear()
+    this.removeFromParent()
+    for (const col of this.colliders) this.physic.removeCollider(col)
+    this.colliders = []
   }
+
+  set volume(value) {
+    this.soundMusic.volume = value
+  }
+
+  get volume() {
+    return this.soundMusic.volume
+  }
+
 }

@@ -30,4 +30,12 @@ export default class Sound {
   get isPlaying() {
     return !this.current.paused
   }
+
+  set volume(value) {
+    this.current.volume = value
+  }
+
+  get volume() {
+    return this.current.volume
+  }
 }
