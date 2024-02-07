@@ -27,4 +27,7 @@ export default class Sound {
     if (volume !== undefined) this.audios[index].volume = clamp1(volume)
     this.current = this.audios[index]
   }
+  get isPlaying() {
+    return !this.current.paused
+  }
 }

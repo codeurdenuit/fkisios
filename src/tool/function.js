@@ -93,9 +93,7 @@ export function nearest(position, objects) {
 }
 
 export function round(number, precision) {
-  return (
-    (Math.floor(precision * Math.abs(number)) / precision) * Math.sign(number)
-  )
+  return (Math.floor(precision * Math.abs(number)) / precision) * Math.sign(number)
 }
 
 export function removeFromArray(item, array) {
@@ -176,8 +174,7 @@ export function createElement(tag, className, value, onclick) {
     else if (tag === 'input') element.value = value
     else element.textContent = value
   }
-  if (onclick)
-    tag === 'a' ? (element.href = onclick) : (element.onclick = onclick)
+  if (onclick) tag === 'a' ? (element.href = onclick) : (element.onclick = onclick)
   return element
 }
 
@@ -188,4 +185,18 @@ export function drawInput(name, value, callback) {
   input.addEventListener('input', callback)
   container.appendChild(input)
   return container
+}
+
+export function cleanGame(Classes, focus, world, graphic, ui) {
+  for (const Class of Classes) {
+    for (let i = 0; i < Class.instances.length; i++) {
+      Class.instances[i].delete()
+      i--
+    }
+  }
+  ui.delete()
+  focus.delete()
+  world.delete()
+  graphic.scene.clear()
+  graphic.stop()
 }

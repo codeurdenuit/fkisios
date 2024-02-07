@@ -42,10 +42,12 @@ export default class Collectable extends Mesh {
     this.rotation.y = 0
     this.progress = 0
     this.onCollect(entity)
-    setTimeout(() => {
-      this.removeFromParent()
-      removeFromArray(this, this.constructor.instances)
-    }, 500)
+    setTimeout(this.delete.bind(this), 500)
+  }
+
+  delete() {
+    this.removeFromParent()
+    removeFromArray(this, this.constructor.instances)
   }
 
   update(dt, Player) {

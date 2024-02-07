@@ -1,5 +1,6 @@
 import { Mesh } from 'three'
 import Rapier from '@dimforge/rapier3d-compat'
+import { removeFromArray } from '../tool/function'
 
 export default class Block extends Mesh {
   static instances = []
@@ -57,6 +58,13 @@ export default class Block extends Mesh {
           player.setContactWithBlock(contactDir)
         }
       })
+  }
+
+  delete() {
+    this.removeFromParent()
+    this.physic.removeCollider(this.collider)
+    this.physic.removeRigidBody(this.rigidBody)
+    removeFromArray(this, Block.instances)
   }
 
   static update(Player) {

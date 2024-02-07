@@ -70,10 +70,7 @@ export default class Ai {
       this.axis.y = this.origin.z - position.z
       this.axis.normalize()
       this.outOfScope = true
-    } else if (
-      getDistance(position, this.origin) < SCOPE * 0.8 &&
-      this.outOfScope
-    ) {
+    } else if (getDistance(position, this.origin) < SCOPE * 0.8 && this.outOfScope) {
       this.outOfScope = false
     }
     if (this.axis.lengthSq() > 0) {
@@ -102,6 +99,8 @@ export default class Ai {
       }
     }
   }
+
+  delete() {}
 
   isVisible(point, position) {
     const distance = getDistance(point, position)

@@ -31,10 +31,8 @@ export default class Home {
 
   drawInputs(div) {
     for (let key in keys) {
-      if (key.length < 6) {
-        const action = keys[key]
-        div.appendChild(drawInput(action, key, this.onKeyChange.bind(this)))
-      }
+      const action = keys[key]
+      div.appendChild(drawInput(action, key, this.onKeyChange.bind(this)))
     }
   }
 
@@ -58,7 +56,11 @@ export default class Home {
   }
 
   show() {
-    this.home.display = 'menu'
+    this.home.className = 'container'
     this.display = true
+  }
+
+  get displayed() {
+    return this.display
   }
 }

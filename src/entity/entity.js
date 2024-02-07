@@ -131,6 +131,7 @@ export default class Entity extends Object3D {
     this.physic.removeCollider(this.collider)
     this.physic.removeRigidBody(this.rigidBody)
     this.removeFromParent()
+    this.ctrl.delete()
   }
 
   static onDead(callback) {

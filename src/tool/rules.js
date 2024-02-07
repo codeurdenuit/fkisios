@@ -2,8 +2,10 @@ import { findInstanceByName } from './function'
 
 export default class Rules {
   list = []
+  cbOver = null
 
   constructor(Player, Block, Box, Area, world, menu) {
+    console.log('new instance Rules')
     const sound = new Audio('sound/secret.wav')
     const soundFall = new Audio('sound/fall.wav')
     const player = Player.getInstance(0)
@@ -38,7 +40,7 @@ export default class Rules {
           soundFall.play()
         }
         if ((t2 += dt) > 1) {
-          window.location.href = window.location.href
+          this.cbOver()
         }
       } else {
         t2 = 0
@@ -48,9 +50,10 @@ export default class Rules {
     let t3 = 0
     const areaEnd = findInstanceByName('area_wood_end', Area)
     this.list.push((dt) => {
-      if (!player.ctrl.active && !menu.display) {
+      if (!player.ctrl.active && !menu.displayed) {
         if ((t3 += dt) > 1.5) {
-          window.location.href = window.location.href
+          console.log('call over')
+          this.cbOver()
         }
       } else if (areaEnd.containsPoint(player.position)) {
         player.ctrl.disable()
@@ -74,6 +77,10 @@ export default class Rules {
       world.ambient.color.setRGB(1 - 0.8 * t4, 1 - 0.8 * t4, 1 - 0.6 * t4)
       world.dirLight.intensity = 4 - 0.5 * t4
     })
+  }
+
+  onGameover(callback) {
+    this.cbOver = callback
   }
 
   update(dt) {

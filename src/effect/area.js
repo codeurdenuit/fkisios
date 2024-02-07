@@ -1,4 +1,5 @@
 import { Box3 } from 'three'
+import { removeFromArray } from '../tool/function'
 
 export default class Area extends Box3 {
   static instances = []

@@ -1,7 +1,7 @@
 import { Mesh, Clock } from 'three'
 import materialGrass from '../shader/grass'
 import materialPlant from '../shader/plant'
-import { replaceMaterial } from '../tool/function'
+import { replaceMaterial, removeFromArray } from '../tool/function'
 
 export default class Grass extends Mesh {
   static instances = []
@@ -55,6 +55,12 @@ export default class Grass extends Mesh {
     }
   }
 
+  delete() {
+    this.clear()
+    this.removeFromParent()
+    removeFromArray(this, this.constructor.instances)
+  }
+
   static onCut(callback) {
     this.cbCut = callback
   }
@@ -69,4 +75,5 @@ export default class Grass extends Mesh {
     shaderGrass.uniforms.time.value += dt
     shaderPlant.uniforms.time.value += dt
   }
+  
 }

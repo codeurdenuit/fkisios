@@ -56,4 +56,8 @@ export default class Focus extends Object3D {
       this.previousFocus = null
     }
   }
+
+  delete() {
+    this.removeFromParent()
+  }
 }

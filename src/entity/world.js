@@ -8,6 +8,8 @@ const materialTree2 = materialTree1.clone()
 materialTree2.color = new Color('#a2d1c3') //#c3a483//#e2d193
 
 export default class World extends Object3D {
+  colliders = []
+  physic = null
   constructor(meshesSolid, meshesCollider, physic) {
     super()
     this.initPhysic(physic, meshesCollider)
@@ -25,12 +27,14 @@ export default class World extends Object3D {
     for (const mesh of meshesCollider) {
       this.createCollider(mesh, physic)
     }
+    this.physic = physic
   }
 
   createCollider(mesh, physic) {
     const vertices = new Float32Array(mesh.geometry.attributes.position.array)
     const indices = new Float32Array(mesh.geometry.index.array)
-    physic.createCollider(Rapier.ColliderDesc.trimesh(vertices, indices))
+    const col = physic.createCollider(Rapier.ColliderDesc.trimesh(vertices, indices))
+    this.colliders.push(col)
   }
 
   initVisual(meshes) {
@@ -73,8 +77,18 @@ export default class World extends Object3D {
     if (shader) shader.uniforms.time.value += dt
   }
 
-  start() {
-    this.soundAmbient.play()
-    this.soundMusic.play()
+  playSound() {
+    if(!this.soundAmbient.isPlaying) {
+      this.soundAmbient.play()
+      this.soundMusic.play()
+    }
+  }
+
+  delete() {
+      this.clear()
+      this.removeFromParent()
+      for(const col of this.colliders)
+        this.physic.removeCollider(col)
+      this.colliders = []
   }
 }

@@ -14,6 +14,9 @@ export default class Graphic extends WebGLRenderer {
   scene = null
   clock = null
   cbUpdate = null
+  camera = null
+  cbLoop = null
+  killed = false
 
   constructor(scene, camera, fx) {
     const canvas = document.getElementById('canvas')
@@ -27,6 +30,7 @@ export default class Graphic extends WebGLRenderer {
     this.camera = camera
     this.scene.background = new TextureLoader().load('sky.jpg')
     this.fx = fx
+    this.cbLoop = this.loop.bind(this)
     window.addEventListener('resize', this.resize.bind(this), false)
 
     this.composer = new EffectComposer(this)
@@ -109,20 +113,27 @@ export default class Graphic extends WebGLRenderer {
     this.composer.addPass(gammaCorrection)
   }
 
+  loop() {
+    if(this.killed) return
+    const dt = this.clock.getDelta()
+    this.cbUpdate(dt)
+    this.bokehPass.uniforms.focus.value = this.camera.distance + 1
+    this.composer.render()
+    //this.render(this.scene, this.camera)
+    this.clearDepth()
+    if (this.fx) this.render(this.fx, this.camera)
+    requestAnimationFrame(this.cbLoop)
+  }
+
   start() {
-    const loop = () => {
-      const dt = this.clock.getDelta()
-      this.cbUpdate(dt)
-      //this.scene.updateWorldMatrix(true, true)
-      // this.clear()
-      this.bokehPass.uniforms.focus.value = this.camera.distance + 1
-      this.composer.render()
-      //this.render(this.scene, this.camera)
-      this.clearDepth()
-      if (this.fx) this.render(this.fx, this.camera)
-      requestAnimationFrame(loop)
-    }
-    loop()
+    this.loop()
+  }
+
+  stop() {
+    cancelAnimationFrame(this.reqId)
+    this.killed = true
+    this.clear()
+    this.dispose ( )
   }
 
   onUpdate(callback) {
