@@ -15,12 +15,7 @@ export default class World extends Object3D {
     this.initPhysic(physic, meshesCollider)
     this.initVisual(meshesSolid)
     this.initLights()
-    const ambient = new Sound('sound/ambient.mp3', 0.3, true)
-    const music = new Sound('sound/AddingTheSun.mp3', 0.4, true)
-    ambient.play()
-    music.play()
-    this.soundAmbient = ambient
-    this.soundMusic = music
+    this.initSounds()
   }
 
   initPhysic(physic, meshesCollider) {
@@ -65,6 +60,13 @@ export default class World extends Object3D {
     this.dirLight = dirLight
     this.dirLight.position.set(24, 5, 10)
     this.dirLight.target.position.set(20, 0, 0)
+  }
+
+  initSounds() {
+    this.soundAmbient = new Sound('sound/ambient.mp3', 0.3, true)
+    this.soundMusic  = new Sound('sound/AddingTheSun.mp3', 0.4, true)
+    this.ambient.play()
+    this.music.play()
   }
 
   update(dt, Player) {
