@@ -63,8 +63,8 @@ export default class World extends Object3D {
   }
 
   initSounds() {
-    this.soundAmbient = new Sound('sound/ambient.mp3', 0.3, true)
-    this.soundMusic = new Sound('sound/AddingTheSun.mp3', 0.4, true)
+    this.soundAmbient = new Sound('./sound/ambient.mp3', 0.3, true)
+    this.soundMusic = new Sound('./sound/AddingTheSun.mp3', 0.4, true)
     this.soundAmbient.play()
     this.soundMusic.play()
   }

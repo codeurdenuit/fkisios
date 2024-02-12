@@ -22,7 +22,7 @@ import { clone, spreadAround, proba, cleanGame } from './tool/function'
 const ast = await loadAssets()
 const home = new Home()
 
-function main() {
+async function main() {
   const scene = new Scene()
 
   ast.meshesRubis.forEach((m) => scene.add(new Rubis(m)))

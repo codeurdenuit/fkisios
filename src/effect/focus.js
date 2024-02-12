@@ -6,8 +6,8 @@ export default class Focus extends Object3D {
 
   timer = 0
   previousFocus = null
-  soundFocus = new Audio('sound/focus.wav')
-  soundCancel = new Audio('sound/cancel.wav')
+  soundFocus = new Audio('./sound/focus.wav')
+  soundCancel = new Audio('./sound/cancel.wav')
 
   constructor() {
     super()

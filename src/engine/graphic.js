@@ -28,7 +28,7 @@ export default class Graphic extends WebGLRenderer {
     this.clock = new Clock()
     this.scene = scene
     this.camera = camera
-    this.scene.background = new TextureLoader().load('sky.jpg')
+    this.scene.background = new TextureLoader().load('./sky.jpg')
     this.fx = fx
     this.cbLoop = this.loop.bind(this)
     window.addEventListener('resize', this.resize.bind(this), false)

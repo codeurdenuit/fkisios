@@ -201,12 +201,12 @@ export default class Mob1 extends Entity {
   }
 
   initSounds() {
-    this.loadSound(BLOCK, 'sound/hit_iron[1-3].wav')
-    this.loadSound(HIT, 'sound/hit_mob.wav')
-    this.loadSound(ATTACK, 'sound/attack_mob.wav')
-    this.loadSound(STEP_L, 'sound/step_iron1.wav')
-    this.loadSound(STEP_R, 'sound/step_iron3.wav')
-    this.loadSound(DEAD, 'sound/death.wav')
+    this.loadSound(BLOCK, './sound/hit_iron[1-3].wav')
+    this.loadSound(HIT, './sound/hit_mob.wav')
+    this.loadSound(ATTACK, './sound/attack_mob.wav')
+    this.loadSound(STEP_L, './sound/step_iron1.wav')
+    this.loadSound(STEP_R, './sound/step_iron3.wav')
+    this.loadSound(DEAD, './sound/death.wav')
   }
 
 

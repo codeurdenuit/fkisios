@@ -4,8 +4,8 @@ import { removeFromArray } from '../tool/function'
 
 export default class Block extends Mesh {
   static instances = []
-  static soundPush = new Audio('sound/push.wav')
-  static soundDrop = new Audio('sound/drop.wav')
+  static soundPush = new Audio('./sound/push.wav')
+  static soundDrop = new Audio('./sound/drop.wav')
 
   physic = null
   rigidBody = null

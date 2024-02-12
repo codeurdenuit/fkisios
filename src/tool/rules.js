@@ -7,9 +7,9 @@ export default class Rules {
   cbOver = null
 
   constructor(Player, Block, Box, Area, Mob, world, menu) {
-    const sound = new Sound('sound/secret.wav')
-    const soundFall = new Sound('sound/fall.wav')
-    const soundDanger = new Sound('sound/danger.mp3',0, true)
+    const sound = new Sound('./sound/secret.wav')
+    const soundFall = new Sound('./sound/fall.wav')
+    const soundDanger = new Sound('./sound/danger.mp3',0, true)
     soundDanger.play()
     
     const player = Player.getInstance(0)

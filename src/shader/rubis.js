@@ -4,7 +4,7 @@ import {
   MeshPhongMaterial
 } from 'three'
 
-const texture = new TextureLoader().load('sky.jpg')
+const texture = new TextureLoader().load('./sky.jpg')
 texture.mapping = EquirectangularReflectionMapping
 
 export const materialA = new MeshPhongMaterial({

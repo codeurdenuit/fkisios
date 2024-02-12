@@ -156,9 +156,9 @@ export default class Mob2 extends Entity {
   }
 
   initSounds() {
-    this.loadSound(JUMP, 'sound/jump.wav')
-    this.loadSound(HIT, 'sound/hit_mob.wav')
-    this.loadSound(DEAD, 'sound/death.wav')
+    this.loadSound(JUMP, './sound/jump.wav')
+    this.loadSound(HIT, './sound/hit_mob.wav')
+    this.loadSound(DEAD, './sound/death.wav')
   }
 
 }

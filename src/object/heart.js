@@ -3,7 +3,7 @@ const HP = 1
 
 export default class Heart extends Collectable {
   static instances = []
-  static sound = new Audio('sound/heart.wav')
+  static sound = new Audio('./sound/heart.wav')
 
   constructor(mesh, position) {
     super(mesh, position)

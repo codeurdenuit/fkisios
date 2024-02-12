@@ -7,8 +7,8 @@ import { removeFromArray } from '../tool/function'
 export default class Box extends Mesh {
   static instances = []
   static cbBreak = null
-  static soundHit = new Sound('sound/hit_wood[1-3].wav')
-  static soundBreak = new Audio('sound/break.wav')
+  static soundHit = new Sound('./sound/hit_wood[1-3].wav')
+  static soundBreak = new Audio('./sound/break.wav')
   hp = 4
   progress = 0
   yOrigin = 0

@@ -6,7 +6,7 @@ import { replaceMaterial, removeFromArray } from '../tool/function'
 export default class Grass extends Mesh {
   static instances = []
   static cbCut = null
-  static sound = new Audio('sound/cut.wav')
+  static sound = new Audio('./sound/cut.wav')
   progress = 0
   clock = null
 
