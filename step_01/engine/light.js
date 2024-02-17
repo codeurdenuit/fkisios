@@ -16,4 +16,7 @@ export default class Light extends Object3D {
     this.add(light)
   }
 
+  update(player) {
+    this.position.copy(player.position)
+  }
 }

@@ -1,15 +1,17 @@
+import { createCollider } from '../tool/function'
 import { Object3D } from 'three'
-import '../tool/function'
 
 export default class World extends Object3D {
-  constructor(visuals) {
+  constructor(visuals, colliders, physic) {
     super()
-    this.initPhysic()
+    this.initPhysic(physic, colliders)
     this.initVisual(visuals)
   }
 
-  initPhysic() {
-
+  initPhysic(physic, meshes) {
+    for (const mesh of meshes) {
+      createCollider(mesh, physic)
+    }
   }
 
   initVisual(meshes) {
