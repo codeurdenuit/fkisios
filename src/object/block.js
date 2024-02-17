@@ -1,9 +1,8 @@
 import { Mesh } from 'three'
 import Rapier from '@dimforge/rapier3d-compat'
-import { removeFromArray } from '../tool/function'
+import { removeFromArray, creatRigidBox } from '../tool/function'
 
 export default class Block extends Mesh {
-  static instances = []
   static soundPush = new Audio('./sound/push.wav')
   static soundDrop = new Audio('./sound/drop.wav')
 
@@ -15,7 +14,6 @@ export default class Block extends Mesh {
     super()
     this.initVisual(mesh)
     this.initPhysic(physic)
-    Block.instances.push(this)
   }
 
   initVisual(mesh) {
@@ -25,19 +23,18 @@ export default class Block extends Mesh {
   }
 
   initPhysic(physic) {
-    const rigidBodyDesc = Rapier.RigidBodyDesc.dynamic()
-    rigidBodyDesc.setTranslation(...this.position)
-    this.rigidBody = physic.createRigidBody(rigidBodyDesc)
-    this.collider = physic.createCollider(
-      Rapier.ColliderDesc.cuboid(0.75, 0.75, 0.75).setDensity(2),
-      this.rigidBody
-    )
+    const { rigidBody, collider } = creatRigidBox(this.position, physic, 0.75)
+    this.rigidBody = rigidBody
+    this.collider = collider
     this.physic = physic
   }
 
-  update(Player) {
-    const player = Player.getInstance(0)
-    this.position.copy(this.rigidBody.translation())
+  update(player) {
+    this.updatePhysic(player)
+    this.updateVisual()
+  }
+
+  updatePhysic(player) {
     this.rigidBody.setEnabledTranslations(true, true, true)
     this.collision = false
     if (player && player.position.y <= this.position.y)
@@ -60,14 +57,13 @@ export default class Block extends Mesh {
       })
   }
 
+  updateVisual() {
+    this.position.copy(this.rigidBody.translation())
+  }
+
   delete() {
     this.removeFromParent()
     this.physic.removeCollider(this.collider)
     this.physic.removeRigidBody(this.rigidBody)
-    removeFromArray(this, Block.instances)
-  }
-
-  static update(Player) {
-    for (const block of Block.instances) block.update(Player)
   }
 }

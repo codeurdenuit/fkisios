@@ -1,5 +1,6 @@
 import { MathUtils } from 'three'
 import { clone as cloneSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.js'
+import Rapier from '@dimforge/rapier3d-compat'
 
 export function getGap(angle1, angle2) {
   let angle = ((angle1 - angle2 + Math.PI) % (Math.PI * 2)) - Math.PI
@@ -92,18 +93,14 @@ export function nearest(position, objects) {
   return objects[0]
 }
 
-export function round(number, precision) {
-  return (Math.floor(precision * Math.abs(number)) / precision) * Math.sign(number)
+export function floor(number, max=0.2) {
+  return Math.abs(number) < max ? 0 : number
 }
 
 export function removeFromArray(item, array) {
   const index = array.indexOf(item)
   array.splice(index, 1)
   return array
-}
-
-export function findInstanceByName(name, aClass) {
-  return aClass.instances.find((c) => name === c.name)
 }
 
 export function findByName(name, list) {
@@ -142,8 +139,8 @@ export function clamp1(val) {
   return val > 1 ? 1 : val < 0 ? 0 : val
 }
 
-export function getTarget(position, Mob, distance) {
-  const entity = nearest(position, Mob.instances)
+export function getTarget(position, mobs, distance) {
+  const entity = nearest(position, mobs)
   if (!entity) return null
   const dis = getDistance(entity.position, position)
   return dis < distance ? entity : null
@@ -187,16 +184,43 @@ export function drawInput(name, value, callback) {
   return container
 }
 
-export function cleanGame(Classes, focus, world, graphic, ui) {
-  for (const Class of Classes) {
-    for (let i = 0; i < Class.instances.length; i++) {
-      Class.instances[i].delete()
-      i--
+export function cleanGame(objects3d, graphic, ui) {
+  for (let key in objects3d) {
+    const object = objects3d[key]
+    if (Array.isArray(object)) {
+      for (const obj of object) {
+        obj.delete()
+      }
+    } else {
+      object.delete()
     }
   }
   ui.delete()
-  focus.delete()
-  world.delete()
   graphic.scene.clear()
   graphic.stop()
+}
+
+export function creatRigidBody(position, physic) {
+  const rigidBodyDesc = Rapier.RigidBodyDesc.dynamic()
+  rigidBodyDesc.setTranslation(...position)
+  const rigidBody = physic.createRigidBody(rigidBodyDesc)
+  const collider = physic.createCollider(Rapier.ColliderDesc.ball(0.5), rigidBody)
+  return { rigidBody, collider }
+}
+
+export function creatRigidBox(position, physic, size) {
+  const rigidBodyDesc = Rapier.RigidBodyDesc.dynamic()
+  rigidBodyDesc.setTranslation(...position)
+  const rigidBody = physic.createRigidBody(rigidBodyDesc)
+  const collider = physic.createCollider(
+    Rapier.ColliderDesc.cuboid(size, size, size).setDensity(2),
+    rigidBody
+  )
+  return { rigidBody, collider }
+}
+
+export function createCollider(mesh, physic) {
+  const vertices = new Float32Array(mesh.geometry.attributes.position.array)
+  const indices = new Float32Array(mesh.geometry.index.array)
+  return physic.createCollider(Rapier.ColliderDesc.trimesh(vertices, indices))
 }

@@ -35,10 +35,10 @@ function initMaterial(mesh, name) {
 }
 
 export default async function loadAssets() {
-  const meshPlayer = await loadObject('./character.glb')
-  const meshMob1 = await loadObject('./mob1.glb')
-  const meshMob2 = await loadObject('./mob2.glb')
-  const meshes = await loadObject('./world.glb')
+  const meshPlayer = await loadObject('./glb/character.glb')
+  const meshMob1 = await loadObject('./glb/mob1.glb')
+  const meshMob2 = await loadObject('./glb/mob2.glb')
+  const meshes = await loadObject('./glb/world.glb')
 
   const meshesGrass = []
   const meshesRubis = []
@@ -50,7 +50,7 @@ export default async function loadAssets() {
   const meshesArea = []
   const spawnsMobA = []
   const spawnsMobB = []
-  const spawnsPlayer = []
+  let spawn = null
 
   for (const mesh of meshes) {
     const name = mesh.name
@@ -62,7 +62,7 @@ export default async function loadAssets() {
     else if (name.includes('heart')) meshesHeart.push(mesh)
     else if (name.includes('block')) meshesBlock.push(mesh)
     else if (name.includes('box')) meshesBox.push(mesh)
-    else if (name.includes('spawn')) spawnsPlayer.push(mesh)
+    else if (name.includes('spawn')) spawn = mesh
     else if (name.includes('mobA')) spawnsMobA.push(mesh)
     else if (name.includes('mobB')) spawnsMobB.push(mesh)
     else if (name.includes('area')) meshesArea.push(mesh)
@@ -82,6 +82,6 @@ export default async function loadAssets() {
     meshMob2,
     spawnsMobA,
     spawnsMobB,
-    spawnsPlayer
+    spawn
   }
 }

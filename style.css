@@ -4,7 +4,6 @@ body {
   overflow: hidden;
 }
 
-
 .hp {
   display: flex;
   position: absolute;
@@ -14,7 +13,7 @@ body {
 
 .heart {
   position: relative;
-  background: url('sprite_ui.png') 0px 0px;
+  background: url('../image/sprite_ui.png') 0px 0px;
   background-size: 128px;
   width: 64px;
   height: 64px;
@@ -30,7 +29,7 @@ body {
 
 .icon {
   position: relative;
-  background: url('sprite_ui.png')-60px -64px;
+  background: url('../image/sprite_ui.png')-60px -64px;
   width: 64px;
   height: 64px;
 }
@@ -145,7 +144,6 @@ body {
   justify-content: flex-start;
   flex-direction: column;
   align-items: center;
-  box-sizing: border-box;
   top: 0;
   right: 0;
   width: 35rem;
@@ -185,7 +183,7 @@ body {
   position: relative;
   width: 22.5rem;
   height: 20rem;
-  background: url('gamepad.png');
+  background: url('../image/gamepad.png');
 }
 
 .button {

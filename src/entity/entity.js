@@ -1,76 +1,56 @@
 import { Vector2, AnimationMixer, Object3D } from 'three'
 import Sound from '../engine/sound'
 import Anim from '../engine/animation'
-import Rapier from '@dimforge/rapier3d-compat'
-import { removeFromArray, nearest } from '../tool/function'
+import { creatRigidBody } from '../tool/function'
 
 export default class Entity extends Object3D {
-  static instances = []
   static hitAngle = Math.PI / 2
   static hitRange = 1.8
   sounds = new Map()
   animes = new Map()
+  rotationVel = 0
+  positionVel = new Vector2()
+  hp = 3
 
   constructor(mesh, origin, physic) {
     super()
     this.mixer = new AnimationMixer(mesh)
     this.clips = mesh.animations
-    this.collider = null
-    this.rigidBody = this.initPhysic(physic, origin.position)
-    this.physic = physic
-    this.positionVel = new Vector2()
-    this.rotationVel = 0
-    this.hp = 3
+    this.initPhysic(physic, origin.position)
+    this.initVisual(mesh)
+    this.initAnimations()
+    this.initSounds()
     this.position.copy(origin.position)
     this.rotation.copy(origin.rotation)
-    this.constructor.instances.push(this)
   }
 
   update(...args) {
     this.ctrl.compute(args[0], args[1], this.position)
     this.onUpdate(...args)
     this.updatePhysic()
+    this.updateVisual()
     this.updateAnimation(args[0])
   }
 
   initPhysic(physic, origin) {
-    const rigidBodyDesc = Rapier.RigidBodyDesc.dynamic()
-    rigidBodyDesc.setTranslation(origin.x, origin.y, origin.z)
-    const rigidBody = physic.createRigidBody(rigidBodyDesc)
-    this.collider = physic.createCollider(
-      Rapier.ColliderDesc.ball(0.5),
-      rigidBody
-    )
-    return rigidBody
+    const { rigidBody, collider } = creatRigidBody(origin, physic)
+    this.rigidBody = rigidBody
+    this.collider = collider
+    this.physic = physic
   }
 
   updatePhysic() {
-    const velY = this.rigidBody.linvel().y
-    const vel = this.positionVel
-    this.rigidBody.setLinvel({ x: vel.x, y: velY, z: vel.y }, true)
+    const y = this.rigidBody.linvel().y
+    const x = this.positionVel.x
+    const z = this.positionVel.y
+    this.rigidBody.setLinvel({ x, y, z }, true)
     this.position.copy(this.rigidBody.translation())
     this.rotation.y += this.rotationVel
   }
 
-  get signRotation() {
-    return Math.sign(this.rotationVel)
-  }
-
-  get rotating() {
-    return Math.abs(this.rotationVel) > 0.01
-  }
-
-  get isFall() {
-    const velocity = this.rigidBody.linvel()
-    return velocity.y < -2.5
-  }
-
-  get active() {
-    return this.ctrl.active
-  }
-
-  set active(value) {
-    this.ctrl.active = value
+  updateVisual() {
+    this.position.copy(this.rigidBody.translation())
+    this.rotation.y += this.rotationVel
   }
 
   loadSound(key, src, vol = 1, loop = false) {
@@ -127,27 +107,34 @@ export default class Entity extends Object3D {
   }
 
   delete() {
-    removeFromArray(this, this.constructor.instances)
     this.physic.removeCollider(this.collider)
     this.physic.removeRigidBody(this.rigidBody)
     this.removeFromParent()
     this.ctrl.delete()
   }
 
-  static onDead(callback) {
-    this.cbDead = callback
+  get signRotation() {
+    return Math.sign(this.rotationVel)
   }
 
-  static update(...args) {
-    const instances = this.instances//is ChildClass has not instances, so root instances
-    for (const instance of instances) instance.update(...args)
+  get rotating() {
+    return Math.abs(this.rotationVel) > 0.01
   }
 
-  static getInstance(index) {
-    return this.instances[index]
+  get isFall() {
+    const velocity = this.rigidBody.linvel()
+    return velocity.y < -2.5
   }
 
-  static nearest(position) {
-    return nearest(position, this.instances)
+  get active() {
+    return this.ctrl.active
+  }
+
+  set active(value) {
+    this.ctrl.active = value
+  }
+
+  static onDelete(callback) {
+    this.cbDelete = callback
   }
 }

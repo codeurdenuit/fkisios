@@ -1,8 +1,7 @@
 import { Vector3 } from 'three'
-import Ai from '../control/control_ai'
+import Ai from '../control/ai'
 import Particles from '../effect/particles'
 import Entity from './entity'
-import Mob1 from './mob1'
 import { getGap, inHitBox, browse, getDistance } from '../tool/function'
 
 const ATTACK = 1
@@ -15,10 +14,9 @@ const VELOCITY = 0.4
 const DEMAGE = 1.5
 
 export default class Mob2 extends Entity {
-  static instances = Mob1.instances
   static hitAngle = Math.PI / 2
   static hitRange = 1.8
-  static cbDead = null
+  static cbDelete = null
   hp = 3
   distance = 999
   ctrl = null
@@ -26,9 +24,6 @@ export default class Mob2 extends Entity {
   constructor(mesh, origin, physic) {
     super(mesh, origin, physic)
     this.ctrl = new Ai(2, origin, 0.5)
-    this.initVisual(mesh)
-    this.initAnimations()
-    this.initSounds()
   }
 
   initVisual(mesh) {
@@ -38,20 +33,20 @@ export default class Mob2 extends Entity {
     this.add(mesh)
   }
 
-  onUpdate(dt, Player) {
+  onUpdate(dt, player) {
     if (!this.isBusy) {
       if (this.ctrl.attack) {
         this.updatePropsAttack()
-        this.updateAnimAttack(Player)
+        this.updateAnimAttack(player)
       } else if (this.ctrl.moving) {
         this.updatePropsWalk(dt)
         this.updateAnimWalk()
       } else {
         this.updatePropsIdle(dt)
-        this.updateAnimIdle(Player)
+        this.updateAnimIdle(player)
       }
     }
-    this.updateDistance(Player)
+    this.updateDistance(player)
   }
 
   updatePropsAttack() {
@@ -60,8 +55,7 @@ export default class Mob2 extends Entity {
     this.positionVel.y = -3 * Math.sin(this.rotation.y - Math.PI / 2)
   }
 
-  updateAnimAttack(Player) {
-    const player = Player.getInstance(0)
+  updateAnimAttack(player) {
     if (!player) return
     if (!this.anim(ATTACK)) return
     this.sound(JUMP)
@@ -98,8 +92,7 @@ export default class Mob2 extends Entity {
     this.anim(IDLE)
   }
 
-  updateDistance(Player) {
-    const player = Player.getInstance(0)
+  updateDistance(player) {
     if (player) {
       this.distance = getDistance(player.position, this.position)
     }
@@ -126,8 +119,8 @@ export default class Mob2 extends Entity {
   updateClipDaying() {
     this.scale.set(0, 0, 0)
     this.sound(DEAD)
-    if (Mob2.cbDead) Mob2.cbDead(this.position)
     this.delete()
+    if (Mob2.cbDelete) Mob2.cbDelete(this.position, this)
   }
 
   createParticles(entity) {

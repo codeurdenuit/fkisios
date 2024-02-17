@@ -3,7 +3,6 @@ const geometry = new ConeGeometry(1 / 10, 1 / 10, 8)
 const material = new MeshBasicMaterial({ color: 0xffff00 })
 
 export default class Focus extends Object3D {
-
   timer = 0
   previousFocus = null
   soundFocus = new Audio('./sound/focus.wav')
@@ -30,8 +29,7 @@ export default class Focus extends Object3D {
     this.renderOrder = 1
   }
 
-  update(dt, Player, camera) {
-    const player = Player.getInstance(0)
+  update(dt, player, camera) {
     if (player && player.focus) {
       if (this.previousFocus !== player.focus) {
         this.timer = 0

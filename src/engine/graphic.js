@@ -28,7 +28,7 @@ export default class Graphic extends WebGLRenderer {
     this.clock = new Clock()
     this.scene = scene
     this.camera = camera
-    this.scene.background = new TextureLoader().load('./sky.jpg')
+    this.scene.background = new TextureLoader().load('./image/sky.jpg')
     this.fx = fx
     this.cbLoop = this.loop.bind(this)
     window.addEventListener('resize', this.resize.bind(this), false)
@@ -114,7 +114,7 @@ export default class Graphic extends WebGLRenderer {
   }
 
   loop() {
-    if(this.killed) return
+    if (this.killed) return
     const dt = this.clock.getDelta()
     this.cbUpdate(dt)
     this.bokehPass.uniforms.focus.value = this.camera.distance + 1
@@ -133,7 +133,7 @@ export default class Graphic extends WebGLRenderer {
     cancelAnimationFrame(this.reqId)
     this.killed = true
     this.clear()
-    this.dispose ( )
+    this.dispose()
   }
 
   onUpdate(callback) {

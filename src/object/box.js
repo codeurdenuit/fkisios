@@ -5,8 +5,8 @@ import Sound from '../engine/sound'
 import { removeFromArray } from '../tool/function'
 
 export default class Box extends Mesh {
-  static instances = []
   static cbBreak = null
+  static cbDelete = null
   static soundHit = new Sound('./sound/hit_wood[1-3].wav')
   static soundBreak = new Audio('./sound/break.wav')
   hp = 4
@@ -20,7 +20,6 @@ export default class Box extends Mesh {
     this.initVisual(mesh)
     this.initPhysic(physic)
     this.initState()
-    Box.instances.push(this)
   }
 
   initVisual(mesh) {
@@ -30,7 +29,7 @@ export default class Box extends Mesh {
 
   initPhysic(physic) {
     const desc = Rapier.ColliderDesc.cuboid(0.75, 0.72, 0.75)
-    .setTranslation(...this.position)
+    .setTranslation( ...this.position )
     this.collider = physic.createCollider(desc)
     this.physic = physic
   }
@@ -49,6 +48,7 @@ export default class Box extends Mesh {
           0.8 * Math.sin(Math.PI * this.progress * 1.4) -
           this.progress
       } else {
+        Box.cbDelete(this)
         this.delete()
       }
       this.progress += dt
@@ -76,14 +76,13 @@ export default class Box extends Mesh {
   delete() {
     this.removeFromParent()
     this.physic.removeCollider(this.collider)
-    removeFromArray(this, Box.instances)
   }
 
   static onBreak(callback) {
     this.cbBreak = callback
   }
 
-  static update(dt) {
-    for (const box of Box.instances) box.update(dt)
+  static onDelete(callback) {
+    this.cbDelete = callback
   }
 }

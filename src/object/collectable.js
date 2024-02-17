@@ -3,8 +3,8 @@ import { removeFromArray, inBox } from '../tool/function'
 const HITBOX = 0.8
 
 export default class Collectable extends Mesh {
-  static instances = []
 
+  static cbDelete = null
   progress = 0
   holder = null
   yOrigin = null
@@ -13,7 +13,6 @@ export default class Collectable extends Mesh {
     super()
     this.initVisual(mesh, params)
     this.initState(position, params)
-    this.constructor.instances.push(this)
   }
 
   initVisual(mesh) {
@@ -26,12 +25,10 @@ export default class Collectable extends Mesh {
     this.yOrigin = this.position.y
   }
 
-  checkPlayer(Player) {
+  checkPlayer(player) {
     if (this.holder) return
-    for (const player of Player.instances) {
-      if (inBox(this.position, player.position, HITBOX)) {
-        this.collect(player)
-      }
+    if (inBox(this.position, player.position, HITBOX)) {
+      this.collect(player)
     }
   }
 
@@ -42,16 +39,18 @@ export default class Collectable extends Mesh {
     this.rotation.y = 0
     this.progress = 0
     this.onCollect(entity)
-    setTimeout(this.delete.bind(this), 500)
+    setTimeout(()=>{
+      if(Collectable.cbDelete) Collectable.cbDelete(this)
+      this.delete()
+    }, 500)
   }
 
   delete() {
     this.removeFromParent()
-    removeFromArray(this, this.constructor.instances)
   }
 
-  update(dt, Player) {
-    this.checkPlayer(Player)
+  update(dt, player) {
+    this.checkPlayer(player)
     if (this.holder) {
       this.position.x = this.holder.position.x
       this.position.z = this.holder.position.z
@@ -69,8 +68,8 @@ export default class Collectable extends Mesh {
     }
   }
 
-  static update(dt, Player) {
-    const instances = this.instances
-    for (const instance of instances) instance.update(dt, Player)
+  static onDelete(callback) {
+    this.cbDelete = callback
   }
+
 }

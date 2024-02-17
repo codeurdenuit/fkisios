@@ -1,5 +1,5 @@
 import { Vector3, LoopOnce } from 'three'
-import Ai from '../control/control_ai'
+import Ai from '../control/ai'
 import Particles from '../effect/particles'
 import Entity from './entity'
 import { getGap, inHitBox, browse, getDistance } from '../tool/function'
@@ -22,7 +22,7 @@ const DEMAGE = 1.5
 export default class Mob1 extends Entity {
   static hitAngle = Math.PI / 2
   static hitRange = 1.8
-  static cbDead = null
+  static cbDelete = null
   hp = 2
   distance = 999
   ctrl = null
@@ -30,9 +30,6 @@ export default class Mob1 extends Entity {
   constructor(mesh, origin, physic) {
     super(mesh, origin, physic)
     this.ctrl = new Ai(4, origin.position, 0.7)
-    this.initVisual(mesh)
-    this.initAnimations()
-    this.initSounds()
   }
 
   initVisual(mesh) {
@@ -42,11 +39,11 @@ export default class Mob1 extends Entity {
     this.add(mesh)
   }
 
-  onUpdate(dt, Player) {
+  onUpdate(dt, player) {
     if (!this.isBusy) {
       if (this.ctrl.attack) {
         this.updatePropsAttack()
-        this.updateAnimAttack(Player)
+        this.updateAnimAttack(player)
       } else if (this.ctrl.moving) {
         this.updatePropsWalk(dt)
         this.updateAnimWalk()
@@ -55,7 +52,7 @@ export default class Mob1 extends Entity {
         this.updateAnimIdle()
       }
     }
-    this.updateDistance(Player)
+    this.updateDistance(player)
   }
 
   updatePropsAttack() {
@@ -63,8 +60,7 @@ export default class Mob1 extends Entity {
     this.rotationVel = 0
   }
 
-  updateAnimAttack(Player) {
-    const player = Player.getInstance(0)
+  updateAnimAttack(player) {
     if (!player) return
     if (!this.anim(ATTACK)) return
     this.onAnimHalf(() => {
@@ -128,7 +124,7 @@ export default class Mob1 extends Entity {
     this.onAnimEnd(() => {
       this.sound(DEAD)
       this.delete()
-      if (Mob1.cbDead) Mob1.cbDead(this.position)
+      if (Mob1.cbDelete) Mob1.cbDelete(this.position, this)
     })
   }
 
@@ -145,8 +141,7 @@ export default class Mob1 extends Entity {
     }
   }
 
-  updateDistance(Player) {
-    const player = Player.getInstance(0)
+  updateDistance(player) {
     if (player) {
       this.distance = getDistance(player.position, this.position)
     }
@@ -173,10 +168,7 @@ export default class Mob1 extends Entity {
 
   get isBusy() {
     return (
-      this.isAnim(HIT) ||
-      this.isAnim(BLOCK) ||
-      this.isAnim(ATTACK) ||
-      this.hp <= 0
+      this.isAnim(HIT) || this.isAnim(BLOCK) || this.isAnim(ATTACK) || this.hp <= 0
     )
   }
 
@@ -208,6 +200,4 @@ export default class Mob1 extends Entity {
     this.loadSound(STEP_R, './sound/step_iron3.wav')
     this.loadSound(DEAD, './sound/death.wav')
   }
-
-
 }

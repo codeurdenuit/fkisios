@@ -1,5 +1,5 @@
 import { Vector3, PointLight } from 'three'
-import { Ctrl } from '../control/control_gamepad'
+import { Ctrl } from '../control/gamepad'
 import Entity from './entity'
 import Particles from '../effect/particles'
 import {
@@ -46,7 +46,6 @@ const RIGHT = 4
 const VELOCITY = 3
 
 export default class Player extends Entity {
-  static instances = []
   static hitAngle = Math.PI / 4
   static hitRange = 2.5
   hp = 4
@@ -56,16 +55,13 @@ export default class Player extends Entity {
   groundType = null
   focused = null
   contact = null
-  eyelid = null
-  light = null
   ctrl = null
+  light = null
 
   constructor(mesh, origin, physic) {
     super(mesh, origin, physic)
     this.ctrl = new Ctrl(this)
-    this.initVisual(mesh)
-    this.initAnimations()
-    this.initSounds()
+    this.initLight()
   }
 
   initVisual(mesh) {
@@ -74,32 +70,32 @@ export default class Player extends Entity {
       m.receiveShadow = true
     })
     mesh.getObjectByName('head').receiveShadow = false
-    this.eyelid = mesh.getObjectByName('eyelid')
-    this.eyelid.userData = { timer: 0, duration: 1 }
     mesh.position.y -= 0.5
     mesh.scale.set(1.2, 1.2, 1.2)
     this.add(mesh)
+  }
+
+  initLight() {
     this.light = new PointLight(0x77aa77, 0, 8)
     this.light.position.set(0.2, 0.3, 1.2)
     this.add(this.light)
   }
 
-  onUpdate(dt, Mob, Grass, Box, Area) {
+  onUpdate(dt, mobs, grasses, boxes, areas) {
     this.cancelPush()
     this.alwayslookTarget()
     if (this.isBusy) return
     if (this.isFall) return this.updateAnimFall()
 
-    this.updateEyes(dt)
-    this.updateGround(Area)
-    this.updateFocus(Mob)
+    this.updateGround(areas)
+    this.updateFocus(mobs)
 
     if (this.isPushing) {
       this.updatePropsPush(dt)
       this.updateAnimPush()
     } else if (this.ctrl.attack) {
       this.updatePropsAttack()
-      this.updateAnimAttack(Mob, Grass, Box)
+      this.updateAnimAttack(mobs, grasses, boxes)
     } else if (!this.ctrl.jump && this.ctrl.moving) {
       this.updatePropsWalk(dt)
       this.updateAnimWalk()
@@ -125,9 +121,9 @@ export default class Player extends Entity {
       this.rotation.y = getAngle(this.focused.position, this.position)
   }
 
-  updateFocus(Mob) {
+  updateFocus(mobs) {
     this.updateFocusSound()
-    this.updateFocused(Mob)
+    this.updateFocused(mobs)
   }
 
   updateFocusSound() {
@@ -138,8 +134,8 @@ export default class Player extends Entity {
     }
   }
 
-  updateFocused(Mob) {
-    if (this.ctrl.lock) this.focused = getTarget(this.position, Mob, 4)
+  updateFocused(mobs) {
+    if (this.ctrl.lock) this.focused = getTarget(this.position, mobs, 4)
     else this.focused = null
   }
 
@@ -148,28 +144,28 @@ export default class Player extends Entity {
     this.rotationVel = 0
   }
 
-  updateAnimAttack(Mob, Grass, Box) {
+  updateAnimAttack(mobs, grasses, boxes) {
     if (this.isAttack) return
     if (this.ctrl.attackLoaded) {
       this.anim(ATTACK_LOADED)
       this.sound(YELL)
       this.onAnimHalf(() => {
         this.sound(ROLL)
-        this.attack(Mob, Grass, Box, Math.PI * 1.5)
+        this.attack(mobs, grasses, boxes, Math.PI * 1.5)
       })
     } else if (this.ctrl.attackTurbo) {
       this.anim(ATTACK).setDuration(0.15)
       this.sound(ATTACK)
       this.sound(SWORD)
       this.onAnimHalf(() => {
-        this.attack(Mob, Grass, Box)
+        this.attack(mobs, grasses, boxes)
       })
     } else {
       this.anim(ATTACK).setDuration(0.4)
       this.sound(ATTACK)
       this.sound(SWORD)
       this.onAnimHalf(() => {
-        this.attack(Mob, Grass, Box)
+        this.attack(mobs, grasses, boxes)
       })
     }
     this.onAnimEnd(() => {
@@ -178,10 +174,9 @@ export default class Player extends Entity {
     })
   }
 
-  attack(Mob, Grass, Box, range) {
-    const mob = nearest(this.position, Mob.instances)
+  attack(mobs, grasses, boxes, range) {
+    const mob = nearest(this.position, mobs)
     this.light.intensity = 0.1
-    const grasses = Grass.instances
     let length = grasses.length
     let posOr = this.position
     for (let i = 0; i < length; i++) {
@@ -199,7 +194,6 @@ export default class Player extends Entity {
       }
     }
 
-    const boxes = Box.instances
     length = boxes.length
     posOr = this.position
     for (let i = 0; i < length; i++) {
@@ -352,7 +346,6 @@ export default class Player extends Entity {
     this.rotationVel = 0
     this.positionVel.set(0, 0)
     this.sound(HIT)
-    this.closeEyes()
     if (this.hp > 0) {
       this.updateAnimHit()
     } else this.updateAnimDaying()
@@ -363,15 +356,9 @@ export default class Player extends Entity {
     this.onAnimEnd(() => {
       this.sound(DEAD)
       this.delete()
+      if(Player.cbDelete)
+      Player.cbDelete(this)
     })
-  }
-
-  closeEyes() {
-    this.eyelid.scale.set(1, 1, 1)
-  }
-
-  openEyes() {
-    this.eyelid.scale.set(0, 0, 0)
   }
 
   addHP(value) {
@@ -455,28 +442,14 @@ export default class Player extends Entity {
     this.groundType = value
   }
 
-  updateGround(Area) {
-    for (const area of Area.instances) {
+  updateGround(areas) {
+    for (const area of areas) {
       if (area.containsPoint(this.position)) {
         this.groundType = area.type
         return
       }
     }
     this.groundType = null
-  }
-
-  updateEyes(dt) {
-    if (this.eyelid.userData.timer > this.eyelid.userData.duration) {
-      this.eyelid.userData.timer = 0
-      if (this.eyelid.scale.x === 0) {
-        this.eyelid.userData.duration = Math.random() * 0.4
-        this.closeEyes()
-      } else {
-        this.eyelid.userData.duration = 2 + Math.random() * 3
-        this.openEyes()
-      }
-    }
-    this.eyelid.userData.timer += dt
   }
 
   getMoveDirection() {

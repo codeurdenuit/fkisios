@@ -1,12 +1,10 @@
 import { createElement } from '../tool/function'
 
 export default class UI {
-  constructor(Player) {
-    const player = Player.getInstance(0)
+  constructor(player) {
     const hp = createElement('div', 'hp')
     for (let i = 0; i < player.hp; i++)
       hp.appendChild(createElement('div', `heart p${i}`))
-
 
     const rubies = createElement('div', 'rubies')
     rubies.appendChild(createElement('div', 'icon'))
@@ -21,18 +19,15 @@ export default class UI {
     this.value = 0
   }
 
-  update(Player) {
-    const player = Player.getInstance(0)
+  update(player) {
     if (!player) return
     this.setRubies(player.rubies)
     this.setHP(player.hp)
   }
 
   setRubies(value) {
-    if (value === 0) 
-      this.rubyValueDom.textContent = '00'
-    else if (value < 10) 
-      this.rubyValueDom.textContent = `0${value}`
+    if (value === 0) this.rubyValueDom.textContent = '00'
+    else if (value < 10) this.rubyValueDom.textContent = `0${value}`
     else this.rubyValueDom.textContent = value
   }
 

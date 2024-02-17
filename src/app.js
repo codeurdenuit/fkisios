@@ -13,11 +13,18 @@ import Focus from './effect/focus'
 import physic from './engine/physic'
 import Graphic from './engine/graphic'
 import Camera from './engine/camera'
+import Light from './engine/light'
 import Rules from './tool/rules'
 import UI from './ui/ui'
 import Home from './ui/home'
 import loadAssets from './tool/loader'
-import { clone, spreadAround, proba, cleanGame } from './tool/function'
+import {
+  clone,
+  spreadAround,
+  proba,
+  cleanGame,
+  removeFromArray
+} from './tool/function'
 
 const ast = await loadAssets()
 const home = new Home()
@@ -25,80 +32,112 @@ const home = new Home()
 async function main() {
   const scene = new Scene()
 
-  ast.meshesRubis.forEach((m) => scene.add(new Rubis(m)))
-  ast.meshesHeart.forEach((m) => scene.add(new Heart(m)))
-  ast.meshesBlock.forEach((m) => scene.add(new Block(m, physic)))
-  ast.meshesBox.forEach((m) => scene.add(new Box(m, physic)))
-  ast.meshesArea.forEach((m) => new Area(m))
-  ast.meshesGrass.forEach((m) => scene.add(new Grass(m)))
-  ast.spawnsMobA.forEach((s) => scene.add(new Mob1(clone(ast.meshMob1), s, physic)))
-  ast.spawnsMobB.forEach((s) => scene.add(new Mob2(clone(ast.meshMob2), s, physic)))
-  ast.spawnsPlayer.forEach((s) =>scene.add(new Player(clone(ast.meshPlayer), s, physic)))
+  const rubies = ast.meshesRubis.map((m) => new Rubis(m))
+  const hearts = ast.meshesHeart.map((m) => new Heart(m))
+  const bloks = ast.meshesBlock.map((m) => new Block(m, physic))
+  const boxes = ast.meshesBox.map((m) => new Box(m, physic))
+  const areas = ast.meshesArea.map((m) => new Area(m))
+  const grasses = ast.meshesGrass.map((m) => new Grass(m))
+  const player = new Player(clone(ast.meshPlayer), ast.spawn, physic)
+  const mobs1 = ast.spawnsMobA.map((m) => new Mob1(clone(ast.meshMob1), m, physic))
+  const mobs2 = ast.spawnsMobB.map((m) => new Mob2(clone(ast.meshMob2), m, physic))
   const world = new World(ast.meshesSolid, ast.meshesCollider, physic)
-  scene.add(world)
-
-  const camera = new Camera(Player)
+  const camera = new Camera(player)
   const focus = new Focus()
-  const ui = new UI(Player)
-  const rules = new Rules(Player, Block, Box, Area, Mob1, world, home)
+  const ui = new UI(player)
+  const light = new Light()
   const graphic = new Graphic(scene, camera, focus)
+  const mobs = mobs1.concat(mobs2)
+  const rules = new Rules(player, bloks, boxes, areas, mobs, world, home, light)
+
+  scene.add(...rubies)
+  scene.add(...hearts)
+  scene.add(...bloks)
+  scene.add(...boxes)
+  scene.add(...grasses)
+  scene.add(player)
+  scene.add(world)
+  scene.add(...mobs)
+  scene.add(light)
 
   graphic.onUpdate((dt) => {
     physic.step()
-    Player.update(dt, Mob1, Grass, Box, Area)
-    Mob1.update(dt, Player)
-    Rubis.update(dt, Player)
-    Heart.update(dt, Player)
-    Block.update(Player)
-    Box.update(dt)
-    Grass.update(dt, Player)
-    world.update(dt, Player)
-    focus.update(dt, Player, camera)
-    camera.update(Player)
+    for (const mob of mobs) mob.update(dt, player)
+    for (const rubis of rubies) rubis.update(dt, player)
+    for (const heart of hearts) heart.update(dt, player)
+    for (const blok of bloks) blok.update(player)
+    for (const box of boxes) box.update(dt)
+    player.update(dt, mobs, grasses, boxes, areas)
+    Grass.update(dt, player)
+    world.update(dt)
+    focus.update(dt, player, camera)
+    camera.update(player)
     rules.update(dt)
-    ui.update(Player)
+    light.update(player)
+    ui.update(player)
   })
 
   Grass.onCut((pos) => {
-    const player = Player.getInstance(0)
-    if (proba(0.05))
-      scene.add(new Rubis(ast.meshesRubis[0], spreadAround(pos, 1, 1)))
-
-    if (proba(0.05) && player.hp < 4)
-      scene.add(new Heart(ast.meshesHeart[0], spreadAround(pos, 1, 1)))
+    if (proba(0.05)) createRubis(pos)
+    if (proba(0.05) && player.hp < 4) createHeart(pos)
   })
 
   Box.onBreak((pos) => {
-    for (let i = 0; i < 4; i++)
-      scene.add(new Rubis(ast.meshesRubis[0], spreadAround(pos, 1, 1)))
-    scene.add(new Rubis(ast.meshesRubis[0], spreadAround(pos, 1, 1), 10))
+    for (let i = 0; i < 4; i++) createRubis(pos)
+    createRubis(pos, 10)
   })
 
-  Mob1.onDead((pos) => {
-    if (proba(0.2)) return
-    scene.add(new Heart(ast.meshesHeart[0], spreadAround(pos, 1, 1)))
-    if (proba(0.2)) scene.add(new Rubis(ast.meshesRubis[0], spreadAround(pos, 1, 1)))
+  Box.onDelete((instance) => {
+    removeFromArray(instance, boxes)
   })
 
-  Mob2.onDead((pos) => {
-    if (proba(0.25)) return
-    scene.add(new Heart(ast.meshesHeart[0], spreadAround(pos, 1, 1)))
+  Mob1.onDelete((pos, instance) => {
+    if (proba(0.2)) createHeart(pos)
+    if (proba(0.2)) createRubis(pos, 10)
+    removeFromArray(instance, mobs)
+  })
+
+  Mob2.onDelete((pos, instance) => {
+    if (proba(0.25)) createHeart(pos)
+    removeFromArray(instance, mobs)
   })
 
   home.onStart(() => {
     home.hide()
     world.playSound()
-    Player.getInstance(0).active = true
+    player.active = true
   })
 
   rules.onGameover(() => {
-    const Classes = [Player, Mob1, Block, Box, Grass, Heart, Rubis]
-    cleanGame(Classes, focus, world, graphic, ui)
+    const objects3D = {
+      player,
+      mobs,
+      bloks,
+      boxes,
+      grasses,
+      hearts,
+      rubies,
+      focus,
+      world
+    }
+    cleanGame(objects3D, graphic, ui)
     main()
   })
 
   home.show()
   graphic.start()
+
+  function createRubis(pos, val = 1) {
+    const ruby = new Rubis(ast.meshesRubis[0], spreadAround(pos, 1, 1), val)
+    rubies.push(ruby)
+    scene.add(ruby)
+  }
+
+  function createHeart(pos) {
+    const heart = new Heart(ast.meshesHeart[0], spreadAround(pos, 1, 1))
+    hearts.push(heart)
+    scene.add(heart)
+  }
 }
 
 main()

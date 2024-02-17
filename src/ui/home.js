@@ -1,5 +1,5 @@
 import { createElement, drawInput } from '../tool/function'
-import { keys } from '../control/control_gamepad'
+import { keys } from '../control/gamepad'
 const text = `
 Javascript has no limits.
 I'm preparing a ThreeJS tutorial for creating video games. 
@@ -12,7 +12,7 @@ export default class Home {
     const home = createElement('div', 'container')
     const menu = createElement('div', 'menu')
     const title = createElement('div', 'title', '𐌅𐌊𐌉𐌔𐌉𐌏𐌔')
-    const pic = createElement('img', 'tech', 'tech.png')
+    const pic = createElement('img', 'tech', './image/tech.png')
     const desc = createElement('div', 'desc', text)
     const button1 = createElement('div', 'button start', 'START', () => {
       this.onStartCb()

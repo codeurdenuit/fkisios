@@ -1,10 +1,10 @@
 import { Mesh, Clock } from 'three'
 import materialGrass from '../shader/grass'
 import materialPlant from '../shader/plant'
-import { replaceMaterial, removeFromArray } from '../tool/function'
+import { replaceMaterial } from '../tool/function'
 
 export default class Grass extends Mesh {
-  static instances = []
+
   static cbCut = null
   static sound = new Audio('./sound/cut.wav')
   progress = 0
@@ -13,7 +13,6 @@ export default class Grass extends Mesh {
   constructor(mesh) {
     super()
     this.initVisual(mesh)
-    Grass.instances.push(this)
   }
 
   initVisual(mesh) {
@@ -58,15 +57,13 @@ export default class Grass extends Mesh {
   delete() {
     this.clear()
     this.removeFromParent()
-    removeFromArray(this, this.constructor.instances)
   }
 
   static onCut(callback) {
     this.cbCut = callback
   }
 
-  static update(dt, Player) {
-    const player = Player.getInstance(0)
+  static update(dt, player) {
     const shaderGrass = materialGrass.userData.shader
     const shaderPlant = materialPlant.userData.shader
     if (!player || !shaderGrass || !shaderPlant) return

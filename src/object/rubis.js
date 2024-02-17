@@ -4,7 +4,6 @@ import { getRubisValue } from '../tool/function'
 import { materialA, materialB } from '../shader/rubis'
 
 export default class Rubis extends Collectable {
-  static instances = []
   static sound1 = new Sound('./sound/get_rubis.wav')
   static sound2 = new Sound('./sound/get_rubis2.wav')
 
