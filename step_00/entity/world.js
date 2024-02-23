@@ -8,9 +8,7 @@ export default class World extends Object3D {
     this.initVisual(visuals)
   }
 
-  initPhysic() {
-
-  }
+  initPhysic() {}
 
   initVisual(meshes) {
     for (const mesh of meshes) {

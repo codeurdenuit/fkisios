@@ -1,4 +1,8 @@
-window.canvas = document.getElementById('canvas')
-window.canvas.width = innerWidth
-window.canvas.height = innerHeight
+
+export function getCanvas() {
+  const canvas = document.getElementsByTagName('canvas')[0]
+  canvas.width = innerWidth
+  canvas.height = innerHeight
+  return canvas
+}
 

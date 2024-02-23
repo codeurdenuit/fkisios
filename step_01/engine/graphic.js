@@ -1,29 +1,28 @@
 import { WebGLRenderer, Clock } from 'three'
+import { getCanvas } from '../tool/function'
 
 export default class Graphic extends WebGLRenderer {
   scene = null
   clock = new Clock()
-  cbUpdate = null
   camera = null
+  cbUpdate = null
   cbLoop = null
 
   constructor(scene, camera) {
-    super({ canvas, antialias: true })
+    const canvas = getCanvas()
+    super({ canvas })
     this.scene = scene
     this.camera = camera
     this.cbLoop = this.loop.bind(this)
     this.shadowMap.enabled = true
+    this.loop()
   }
 
   loop() {
     const dt = this.clock.getDelta()
-    this.cbUpdate(dt)
+    if (this.cbUpdate) this.cbUpdate(dt)
     this.render(this.scene, this.camera)
     requestAnimationFrame(this.cbLoop)
-  }
-
-  start() {
-    this.loop()
   }
 
   onUpdate(callback) {

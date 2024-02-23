@@ -2,6 +2,13 @@ import { MathUtils } from 'three'
 import { clone as cloneSkeleton } from 'three/examples/jsm/utils/SkeletonUtils.js'
 import Rapier from '@dimforge/rapier3d-compat'
 
+export function getCanvas() {
+  const canvas = document.getElementsByTagName('canvas')[0]
+  canvas.width = innerWidth
+  canvas.height = innerHeight
+  return canvas
+}
+
 export function getGap(angle1, angle2) {
   let angle = ((angle1 - angle2 + Math.PI) % (Math.PI * 2)) - Math.PI
   angle < -Math.PI ? angle + Math.PI * 2 : angle
@@ -93,8 +100,8 @@ export function nearest(position, objects) {
   return objects[0]
 }
 
-export function floor(number, max=0.2) {
-  return Math.abs(number) < max ? 0 : number
+export function floor(float, max = 0.2) {
+  return Math.abs(float) < max ? 0 : float
 }
 
 export function removeFromArray(item, array) {
@@ -216,6 +223,7 @@ export function creatRigidBox(position, physic, size) {
     Rapier.ColliderDesc.cuboid(size, size, size).setDensity(2),
     rigidBody
   )
+  rigidBody.lockRotations(true)
   return { rigidBody, collider }
 }
 

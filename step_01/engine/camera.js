@@ -2,13 +2,14 @@ import { PerspectiveCamera } from 'three'
 
 export default class Camera extends PerspectiveCamera {
   constructor() {
-    super(50, innerWidth / innerHeight)
+    super(70, innerWidth / innerHeight)
+    this.position.set(0, 5.4, 9)
+    this.lookAt(0, 0, 1.8)
   }
 
   update(player) {
     this.position.copy(player.position)
     this.position.y += 4
     this.position.z += 4
-    this.lookAt(player.position)
   }
 }

@@ -343,6 +343,7 @@ export default class Player extends Entity {
     if (this.isCooldown) return
     this.createParticles(entity)
     this.hp -= damage
+    this.hp = Math.max(0, this.hp)
     this.rotationVel = 0
     this.positionVel.set(0, 0)
     this.sound(HIT)

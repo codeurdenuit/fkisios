@@ -15,5 +15,4 @@ export default class Light extends Object3D {
     this.add(ambient)
     this.add(light)
   }
-
 }

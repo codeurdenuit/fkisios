@@ -7,16 +7,11 @@ const LOCK = 7
 const X = 0
 const Z = 1
 
-export default class Player {
- 
+export default class Gamepad {
   axis = new Vector3()
   lock = false
   attack = false
   jump = false
-
-  constructor() {
-
-  }
 
   update() {
     const gamepad = navigator.getGamepads()[0]
@@ -27,9 +22,4 @@ export default class Player {
     this.jump = gamepad.buttons[JUMP].pressed
     this.lock = gamepad.buttons[LOCK].pressed
   }
-
-  get magnitude() {
-    return this.axis.length()
-  }
- 
 }

@@ -8,22 +8,14 @@ import World from './entity/world'
 const meshes = await loadAssets('./glb/world0.glb')
 
 const scene = new Scene()
-
 const world = new World(meshes.visuals)
 const light = new Light()
+const camera = new Camera()
+const graphic = new Graphic(scene, camera)
 
 scene.add(world)
 scene.add(light)
 
-const camera = new Camera()
-const graphic = new Graphic(scene, camera)
-
-graphic.onUpdate((dt) => {
-
-})
-
+graphic.onUpdate((dt) => {})
 
 graphic.start()
-
-
-

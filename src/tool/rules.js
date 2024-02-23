@@ -35,7 +35,7 @@ export default class Rules {
     })
 
     /////// PUSH BLOCK TO PASS /////////////////
-    const block = findByName('block_cast_receive', blocks)
+    /*const block = findByName('block_cast_receive', blocks)
     const area = findByName('area_trigger', areas)
     let t1 = 0
     this.list.push((dt) => {
@@ -47,7 +47,7 @@ export default class Rules {
       } else {
         t1 = 0
       }
-    })
+    })*/
 
     /////// FALL INTO THE VOID /////////////////
     let t2 = 0
@@ -73,7 +73,6 @@ export default class Rules {
     this.list.push((dt) => {
       if (!player.ctrl.active && !menu.displayed) {
         if ((t3 += dt) > 1.5) {
-          debugger
           this.gameover()
         }
       } else if (areaEnd.containsPoint(player.position)) {
@@ -105,14 +104,14 @@ export default class Rules {
       const mob = nearest(player.position, mobs)
       if(mob && mob.distance<7) {
         const factor = (1-mob.distance/7)
-        const dv1=(0.8*factor-soundDanger.volume)*dt
+        const dv1=(0.6*factor-soundDanger.volume)*dt
         soundDanger.volume = soundDanger.volume+dv1
-        const dv2=(0.4*factor-world.volume)*dt
+        const dv2=(0.3*factor-world.volume)*dt
         world.volume = world.volume+dv2
       } else {
         const dv1=(0-soundDanger.volume)*dt
         soundDanger.volume = soundDanger.volume+dv1
-        const dv2=(0.4-world.volume)*dt
+        const dv2=(0.2-world.volume)*dt
         world.volume = world.volume+dv2
       }
     })

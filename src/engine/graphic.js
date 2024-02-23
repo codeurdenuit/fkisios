@@ -8,6 +8,7 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js'
 import { Mesh, AnimationMixer, AnimationClip, LoopOnce } from 'three'
 import overwrite from '../tool/overwrite'
+import { getCanvas } from '../tool/function'
 overwrite(Mesh, AnimationMixer, AnimationClip, LoopOnce)
 
 export default class Graphic extends WebGLRenderer {
@@ -19,9 +20,7 @@ export default class Graphic extends WebGLRenderer {
   killed = false
 
   constructor(scene, camera, fx) {
-    const canvas = document.getElementById('canvas')
-    canvas.width = innerWidth
-    canvas.height = innerHeight
+    const canvas = getCanvas()
     super({ canvas, antialias: true })
     this.shadowMap.enabled = true
     this.autoClear = false

@@ -1,4 +1,5 @@
 import { WebGLRenderer, Clock } from 'three'
+import { getCanvas } from '../tool/function'
 
 export default class Graphic extends WebGLRenderer {
   scene = null
@@ -8,6 +9,7 @@ export default class Graphic extends WebGLRenderer {
   cbLoop = null
 
   constructor(scene, camera) {
+    const canvas = getCanvas()
     super({ canvas, antialias: true })
     this.scene = scene
     this.camera = camera
