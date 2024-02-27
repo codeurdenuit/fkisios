@@ -2,8 +2,8 @@ import { Scene } from 'three'
 import Graphic from './engine/graphic'
 import Camera from './engine/camera'
 import Light from './engine/light'
-import loadAssets from './tool/loader'
 import World from './entity/world'
+import loadAssets from './tool/loader'
 
 const meshes = await loadAssets('./glb/world0.glb')
 

@@ -1,3 +1,4 @@
+import {clone, spreadAround, proba, cleanGame, removeFromArray} from './tool/function'
 import { Scene } from 'three'
 import World from './entity/world'
 import Player from './entity/player'
@@ -10,7 +11,6 @@ import Rubis from './object/rubis'
 import Heart from './object/heart'
 import Area from './effect/area'
 import Focus from './effect/focus'
-import physic from './engine/physic'
 import Graphic from './engine/graphic'
 import Camera from './engine/camera'
 import Light from './engine/light'
@@ -18,13 +18,8 @@ import Rules from './tool/rules'
 import UI from './ui/ui'
 import Home from './ui/home'
 import loadAssets from './tool/loader'
-import {
-  clone,
-  spreadAround,
-  proba,
-  cleanGame,
-  removeFromArray
-} from './tool/function'
+import physic from './engine/physic'
+
 
 const ast = await loadAssets()
 const home = new Home()
@@ -55,9 +50,9 @@ async function main() {
   scene.add(...bloks)
   scene.add(...boxes)
   scene.add(...grasses)
+  scene.add(...mobs)
   scene.add(player)
   scene.add(world)
-  scene.add(...mobs)
   scene.add(light)
 
   graphic.onUpdate((dt) => {
@@ -109,17 +104,7 @@ async function main() {
   })
 
   rules.onGameover(() => {
-    const objects3D = {
-      player,
-      mobs,
-      bloks,
-      boxes,
-      grasses,
-      hearts,
-      rubies,
-      focus,
-      world
-    }
+    const objects3D = {player, mobs, bloks, boxes, grasses, hearts, rubies, focus, world }
     cleanGame(objects3D, graphic, ui)
     main()
   })
