@@ -7,20 +7,29 @@ export function getCanvas() {
   return canvas
 }
 
-export function createCollider(mesh, physic) {
-  const geo = mesh.geometry
+function createColliderBall(radius, rigidBody, physic) {
+  const colliderDesc = ColliderDesc.ball(radius)
+  return physic.createCollider(colliderDesc, rigidBody)
+}
+
+function createColliderGeo(geo, rigidBody, physic) {
   const vertices = new Float32Array(geo.attributes.position.array)
   const indices = new Float32Array(geo.index.array)
   const colliderDesc = ColliderDesc.trimesh(vertices, indices)
-  return physic.createCollider(colliderDesc)
+  return physic.createCollider(colliderDesc, rigidBody)
 }
 
-export function createRigidBody(position, physic) {
+export function createRigidBodyFixed(mesh, physic) {
+  const rigidBodyDesc = RigidBodyDesc.fixed()
+  const rigidBody = physic.createRigidBody(rigidBodyDesc)
+  createColliderGeo(mesh.geometry, rigidBody, physic)
+}
+
+export function createRigidBodyEntity(position, physic) {
   const rigidBodyDesc = RigidBodyDesc.dynamic()
   rigidBodyDesc.setTranslation(...position)
   const rigidBody = physic.createRigidBody(rigidBodyDesc)
-  const colliderDesc = ColliderDesc.ball(0.25)
-  const collider = physic.createCollider(colliderDesc, rigidBody)
+  const collider = createColliderBall(0.25, rigidBody, physic)
   return { rigidBody, collider }
 }
 

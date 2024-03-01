@@ -1,28 +1,23 @@
 import { Object3D } from 'three'
 import Gamepad from '../control/gamepad'
-import { createRigidBody } from '../tool/function'
+import { createRigidBodyEntity } from '../tool/function'
 
 const SPEED = 3
 
 export default class Player extends Object3D {
   collider = null
   rigidBody = null
-  ctrl = null
+  ctrl = new Gamepad()
 
   constructor(mesh, physic) {
     super()
     this.position.copy(mesh.position)
-    this.initCtrl()
     this.initPhysic(physic)
     this.initVisual(mesh)
   }
 
-  initCtrl() {
-    this.ctrl = new Gamepad()
-  }
-
   initPhysic(physic) {
-    const { rigidBody, collider } = createRigidBody(this.position, physic)
+    const { rigidBody, collider } = createRigidBodyEntity(this.position, physic)
     this.rigidBody = rigidBody
     this.collider = collider
   }
@@ -36,12 +31,11 @@ export default class Player extends Object3D {
   update() {
     this.updatePhysic()
     this.updateVisual()
-    this.updateCtrl()
   }
 
   updatePhysic() {
-    const x = this.ctrl.axis.x * SPEED
-    const z = this.ctrl.axis.z * SPEED
+    const x = this.ctrl.x * SPEED
+    const z = this.ctrl.z * SPEED
     const y = this.rigidBody.linvel().y
     this.rigidBody.setLinvel({ x, y, z }, true)
   }
@@ -50,7 +44,4 @@ export default class Player extends Object3D {
     this.position.copy(this.rigidBody.translation())
   }
 
-  updateCtrl() {
-    this.ctrl.update()
-  }
 }

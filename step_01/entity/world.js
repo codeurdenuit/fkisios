@@ -1,5 +1,5 @@
 import { Object3D } from 'three'
-import { createCollider } from '../tool/function'
+import { createRigidBodyFixed } from '../tool/function'
 
 export default class World extends Object3D {
   constructor(visuals, colliders, physic) {
@@ -10,7 +10,7 @@ export default class World extends Object3D {
 
   initPhysic(meshes, physic) {
     for (const mesh of meshes) {
-      createCollider(mesh, physic)
+      createRigidBodyFixed(mesh, physic)
     }
   }
 

@@ -1,4 +1,3 @@
-import { Vector3 } from 'three'
 import { floor } from '../tool/function'
 
 const ATTACK = 0
@@ -8,18 +7,33 @@ const X = 0
 const Z = 1
 
 export default class Gamepad {
-  axis = new Vector3()
-  lock = false
-  attack = false
-  jump = false
 
-  update() {
-    const gamepad = navigator.getGamepads()[0]
-    if (!gamepad) return
-    this.axis.x = floor(gamepad.axes[X])
-    this.axis.z = floor(gamepad.axes[Z])
-    this.attack = gamepad.buttons[ATTACK].pressed
-    this.jump = gamepad.buttons[JUMP].pressed
-    this.lock = gamepad.buttons[LOCK].pressed
+  get gamepad() {
+    return navigator.getGamepads()[0]
+  }
+
+  get x() {
+    if (!this.gamepad) return 0
+    return floor(this.gamepad.axes[X])
+  }
+
+  get z() {
+    if (!this.gamepad) return 0
+    return floor(this.gamepad.axes[Z])
+  }
+
+  get attack() {
+    if (!this.gamepad) return false
+    return this.gamepad.buttons[ATTACK].pressed
+  }
+
+  get jump() {
+    if (!this.gamepad) return false
+    return this.gamepad.buttons[JUMP].pressed
+  }
+
+  get lock() {
+    if (!this.gamepad) return false
+    return this.gamepad.buttons[LOCK].pressed
   }
 }
