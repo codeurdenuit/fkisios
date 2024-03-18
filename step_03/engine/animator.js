@@ -1,7 +1,7 @@
 import { LoopOnce, AnimationMixer } from 'three'
 import { findByName } from '../tool/function'
 
-export default class Clip {
+export default class Animator {
   animations = new Map()
   mixer = null
   clips = null
@@ -20,13 +20,12 @@ export default class Clip {
     this.animations.set(name, animation)
   }
 
-  play(name, sign) {
+  play(name) {
     const animation = this.animations.get(name)
     if (this.current && this.current !== animation) this.current.stop()
     this.current = animation
     if (this.current.isRunning()) return
     this.current.play()
-    if (sign) anim.timeScale = Math.abs(anim.timeScale) * sign
   }
 
   isPlaying(name) {
