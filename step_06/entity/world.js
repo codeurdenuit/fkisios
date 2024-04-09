@@ -1,11 +1,14 @@
 import { Object3D } from 'three'
 import { createRigidBodyFixed } from '../tool/function'
+import Area from '../engine/area'
 
 export default class World extends Object3D {
-  constructor(visuals, colliders, physic) {
+  areas = []
+  constructor(visuals, colliders, physic, areas) {
     super()
     this.initPhysic(colliders, physic)
     this.initVisual(visuals)
+    this.initArea(areas)
   }
 
   initPhysic(meshes, physic) {
@@ -19,6 +22,12 @@ export default class World extends Object3D {
       mesh.receiveShadow = true
       mesh.castShadow = true
       this.add(mesh)
+    }
+  }
+
+  initArea(areas) {
+    for(let area of areas) {
+      this.areas.push(new Area(area))
     }
   }
 }

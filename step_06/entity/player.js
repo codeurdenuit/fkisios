@@ -22,6 +22,11 @@ const DIRT_R = './sound/step_dirt[1-2].wav'
 const DIRT_L = './sound/step_dirt[3-4].wav'
 const WARD = './sound/shield.wav'
 
+const WOOD = 'wood'
+const DIRT = 'dirt'
+const STONE = 'stone'
+const GRASS = 'grass'
+
 
 export default class Player extends Object3D {
   collider = null
@@ -29,8 +34,9 @@ export default class Player extends Object3D {
   animator = null
   sound = new Sound()
   ctrl = new Gamepad()
+  ground = null
 
-  constructor(mesh, physic) {
+  constructor(mesh, physic, areas) {
     super()
     const origin = new Vector3(0, 4, 0)
     this.animator = new Animator(mesh)
@@ -71,10 +77,11 @@ export default class Player extends Object3D {
     this.sound.load(WARD)
   }
 
-  update(dt) {
+  update(dt, areas) {
     this.updatePhysic()
     this.updateVisual(dt)
     this.updateAnimation(dt)
+    this.updateGround(areas)
     this.updateSound()
   }
 
@@ -111,13 +118,37 @@ export default class Player extends Object3D {
       this.sound.play(YELL)
     })
     this.animator.onEnd(RUN, () => {
+      if(this.ground === DIRT)
       this.sound.play(DIRT_R)
+      else if (this.ground === WOOD)
+      this.sound.play(WOOD_R)
+      else if (this.ground === STONE)
+      this.sound.play(WOOD_R)
+      else 
+      this.sound.play(GRASS_R)
     })
     this.animator.onHalf(RUN, () => {
+      if(this.ground === DIRT)
       this.sound.play(DIRT_L)
+      else if (this.ground === WOOD)
+      this.sound.play(WOOD_L)
+      else if (this.ground === STONE)
+      this.sound.play(WOOD_L)
+      else 
+      this.sound.play(GRASS_L)
     })
     this.animator.onStart(SHIELD, () => {
       this.sound.play(WARD)
     })
   }
+
+  updateGround(areas) {
+    this.ground = GRASS
+    for(let area of areas) {
+      const type = area.in(this.position)
+      if(type) { this.ground = type; break }
+    }
+  }
+
+
 }

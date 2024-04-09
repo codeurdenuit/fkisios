@@ -12,7 +12,7 @@ const assetP = await loadEntity('./glb/character.glb')
 
 const scene = new Scene()
 const camera = new Camera()
-const world = new World(assetW.visuals, assetW.colliders, physic)
+const world = new World(assetW.visuals, assetW.colliders, physic, assetW.areas)
 const player = new Player(assetP, physic)
 const light = new Light()
 
@@ -23,7 +23,7 @@ scene.add(player)
 const graphic = new Graphic(scene, camera)
 graphic.onUpdate((dt) => {
   physic.step()
-  player.update(dt)
+  player.update(dt, world.areas)
   camera.update(player)
   light.update(player)
 })
