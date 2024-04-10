@@ -22,10 +22,9 @@ const DIRT_R = './sound/step_dirt[1-2].wav'
 const DIRT_L = './sound/step_dirt[3-4].wav'
 const WARD = './sound/shield.wav'
 
-const WOOD = 'wood'
-const DIRT = 'dirt'
-const STONE = 'stone'
 const GRASS = 'grass'
+const STEP_R = {grass:GRASS_R, wood:WOOD_R, dirt:DIRT_R, stone:STONE_R } 
+const STEP_L = {grass:GRASS_L, wood:WOOD_L, dirt:DIRT_L, stone:STONE_L } 
 
 export default class Player extends Object3D {
   collider = null
@@ -117,18 +116,10 @@ export default class Player extends Object3D {
       this.sound.play(YELL)
     })
     this.animator.onEnd(RUN, () => {
-      if (this.ground === DIRT) 
-        this.sound.play(DIRT_R)
-      else if (this.ground === WOOD) 
-          this.sound.play(WOOD_R)
-      else if (this.ground === STONE) this.sound.play(STONE_R)
-      else this.sound.play(GRASS_R)
+      this.sound.play(STEP_R[this.ground])
     })
     this.animator.onHalf(RUN, () => {
-      if (this.ground === DIRT) this.sound.play(DIRT_L)
-      else if (this.ground === WOOD) this.sound.play(WOOD_L)
-      else if (this.ground === STONE) this.sound.play(STONE_L)
-      else this.sound.play(GRASS_L)
+      this.sound.play(STEP_L[this.ground])
     })
     this.animator.onStart(SHIELD, () => {
       this.sound.play(WARD)
