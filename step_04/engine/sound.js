@@ -1,4 +1,3 @@
-import { clamp1 } from '../tool/function'
 
 export default class Sound {
   tracks = new Map()
@@ -9,12 +8,16 @@ export default class Sound {
     this.tracks.set(key, track)
   }
 
-  play(key, volume = 1) {
-    if (this.current) this.current.pause()
+  play(key) {
+    this.stop()
     const track = this.tracks.get(key)
-    track.currentTime = 0
     track.play()
-    track.volume = clamp1(volume)
     this.current = track
+  }
+
+  stop() {
+    if (!this.current) return
+    this.current.pause()
+    this.current.currentTime = 0
   }
 }

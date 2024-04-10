@@ -4,7 +4,6 @@ export default class Area extends Box3 {
   constructor(mesh) {
     super()
     this.type = mesh.name.split('_')[1]
-    console.log(this.type)
     this.copy(mesh.geometry.boundingBox)
   }
 

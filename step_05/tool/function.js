@@ -74,10 +74,6 @@ export function getSrc(src) {
   return [src]
 }
 
-export function clamp1(val) {
-  return val > 1 ? 1 : val < 0 ? 0 : val
-}
-
 export function randomInt(range = 1) {
   return Math.floor(Math.random() * range)
 }

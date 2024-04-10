@@ -1,4 +1,4 @@
-import { getSrc, randomInt, clamp1 } from '../tool/function'
+import { getSrc, randomInt } from '../tool/function'
 
 export default class Sound {
   tracks = new Map()
@@ -15,12 +15,16 @@ export default class Sound {
   }
 
   play(key, volume = 1) {
-    if (this.current) this.current.pause()
+    this.stop()
     const track = this.tracks.get(key)
     const index = randomInt(track.length)
-    track[index].currentTime = 0
     track[index].play()
-    track[index].volume = clamp1(volume)
     this.current = track[index]
+  }
+
+  stop() {
+    if (!this.current) return
+    this.current.pause()
+    this.current.currentTime = 0
   }
 }

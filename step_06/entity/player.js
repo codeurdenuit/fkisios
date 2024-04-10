@@ -27,7 +27,6 @@ const DIRT = 'dirt'
 const STONE = 'stone'
 const GRASS = 'grass'
 
-
 export default class Player extends Object3D {
   collider = null
   rigidBody = null
@@ -118,24 +117,18 @@ export default class Player extends Object3D {
       this.sound.play(YELL)
     })
     this.animator.onEnd(RUN, () => {
-      if(this.ground === DIRT)
-      this.sound.play(DIRT_R)
-      else if (this.ground === WOOD)
-      this.sound.play(WOOD_R)
-      else if (this.ground === STONE)
-      this.sound.play(WOOD_R)
-      else 
-      this.sound.play(GRASS_R)
+      if (this.ground === DIRT) 
+        this.sound.play(DIRT_R)
+      else if (this.ground === WOOD) 
+          this.sound.play(WOOD_R)
+      else if (this.ground === STONE) this.sound.play(STONE_R)
+      else this.sound.play(GRASS_R)
     })
     this.animator.onHalf(RUN, () => {
-      if(this.ground === DIRT)
-      this.sound.play(DIRT_L)
-      else if (this.ground === WOOD)
-      this.sound.play(WOOD_L)
-      else if (this.ground === STONE)
-      this.sound.play(WOOD_L)
-      else 
-      this.sound.play(GRASS_L)
+      if (this.ground === DIRT) this.sound.play(DIRT_L)
+      else if (this.ground === WOOD) this.sound.play(WOOD_L)
+      else if (this.ground === STONE) this.sound.play(STONE_L)
+      else this.sound.play(GRASS_L)
     })
     this.animator.onStart(SHIELD, () => {
       this.sound.play(WARD)
@@ -144,11 +137,12 @@ export default class Player extends Object3D {
 
   updateGround(areas) {
     this.ground = GRASS
-    for(let area of areas) {
+    for (let area of areas) {
       const type = area.in(this.position)
-      if(type) { this.ground = type; break }
+      if (type) {
+        this.ground = type
+        break
+      }
     }
   }
-
-
 }

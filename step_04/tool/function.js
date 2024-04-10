@@ -58,7 +58,3 @@ export function range(angle1, angle2) {
   angle < -Math.PI ? angle + Math.PI * 2 : angle
   return angle
 }
-
-export function clamp1(val) {
-  return val > 1 ? 1 : val < 0 ? 0 : val
-}
