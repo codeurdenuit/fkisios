@@ -38,6 +38,7 @@ export default class Player extends Object3D {
     this.initVisual(mesh)
     this.initAnimations()
     this.initSound()
+    this.syncAnimSound()
   }
 
   initPhysic(physic, origin) {
@@ -75,7 +76,6 @@ export default class Player extends Object3D {
     this.updatePhysic()
     this.updateVisual(dt)
     this.updateAnimation(dt)
-    this.updateSound()
   }
 
   updatePhysic() {
@@ -106,7 +106,7 @@ export default class Player extends Object3D {
     this.animator.update(dt)
   }
 
-  updateSound() {
+  syncAnimSound() {
     this.animator.onHalf(ATTACK, () => {
       this.sound.play(YELL)
     })

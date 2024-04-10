@@ -42,6 +42,7 @@ export default class Player extends Object3D {
     this.initVisual(mesh)
     this.initAnimations()
     this.initSound()
+    this.syncAnimSound()
   }
 
   initPhysic(physic, origin) {
@@ -80,7 +81,6 @@ export default class Player extends Object3D {
     this.updateVisual(dt)
     this.updateAnimation(dt)
     this.updateGround(areas)
-    this.updateSound()
   }
 
   updatePhysic() {
@@ -111,7 +111,18 @@ export default class Player extends Object3D {
     this.animator.update(dt)
   }
 
-  updateSound() {
+  updateGround(areas) {
+    this.ground = GRASS
+    for (let area of areas) {
+      const type = area.in(this.position)
+      if (type) {
+        this.ground = type
+        break
+      }
+    }
+  }
+
+  syncAnimSound() {
     this.animator.onHalf(ATTACK, () => {
       this.sound.play(YELL)
     })
@@ -124,16 +135,5 @@ export default class Player extends Object3D {
     this.animator.onStart(SHIELD, () => {
       this.sound.play(WARD)
     })
-  }
-
-  updateGround(areas) {
-    this.ground = GRASS
-    for (let area of areas) {
-      const type = area.in(this.position)
-      if (type) {
-        this.ground = type
-        break
-      }
-    }
   }
 }
