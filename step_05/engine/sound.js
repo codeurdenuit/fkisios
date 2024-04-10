@@ -5,10 +5,10 @@ export default class Sound {
   current = null
 
   load(key) {
-    const urls = getSrc(key)
+    const srcs = getSrc(key)
     const track = []
-    for (const url of urls) {
-      const audio = new Audio(url)
+    for (const src of srcs) {
+      const audio = new Audio(src)
       track.push(audio)
     }
     this.tracks.set(key, track)

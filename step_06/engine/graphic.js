@@ -1,8 +1,5 @@
 import { WebGLRenderer, Clock } from 'three'
 import { getCanvas } from '../tool/function'
-import overwrite from '../tool/overwrite'
-
-overwrite()
 
 export default class Graphic extends WebGLRenderer {
   scene = null
