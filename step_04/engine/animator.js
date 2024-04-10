@@ -12,10 +12,10 @@ export default class Animator {
   constructor(mesh) {
     this.mixer = new AnimationMixer(mesh)
     this.clips = mesh.clips
-    this.initListners()
+    this.initListeners()
   }
 
-  initListners() {
+  initListeners() {
     this.mixer.addEventListener('loop', () => {
       this.fireListener(this.listenerEnd, this.current)
     })
