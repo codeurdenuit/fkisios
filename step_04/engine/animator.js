@@ -8,8 +8,7 @@ export default class Animator {
   mixer = null
   clips = null
   current = null
-  listenerEnd = new Map()
-  listenerHalf = new Map()
+  listeners = new Map()
 
   constructor(mesh) {
     this.mixer = new AnimationMixer(mesh)
@@ -19,10 +18,10 @@ export default class Animator {
 
   initListeners() {
     this.mixer.addEventListener('loop', () => {
-      this.fireListener(this.listenerEnd, this.current)
+      this.fireListener( this.current._clip.name, 'loop')
     })
     this.mixer.addEventListener('half', () => {
-      this.fireListener(this.listenerHalf, this.current)
+      this.fireListener( this.current._clip.name, 'half')
     })
   }
 
@@ -32,6 +31,7 @@ export default class Animator {
     animation.setDuration(duration)
     if (once) animation.setLoop(LoopOnce)
     this.animations.set(name, animation)
+    this.listeners.set(name, new Map())
   }
 
   play(name) {
@@ -50,18 +50,12 @@ export default class Animator {
     this.mixer.update(dt)
   }
 
-  fireListener(listeners, anim) {
-    const listener = listeners.get(anim)
-    if (listener) listener()
+  fireListener(name, event) {
+    const listener = this.listeners.get(name)
+    if (listener.get(event)) listener.get(event)()
   }
 
-  onEnd(name, callback) {
-    const anim = this.animations.get(name)
-    this.listenerEnd.set(anim, callback)
-  }
-
-  onHalf(name, callback) {
-    const anim = this.animations.get(name)
-    this.listenerHalf.set(anim, callback)
+  on(name, event, callback) {
+    this.listeners.get(name).set(event, callback)
   }
 }

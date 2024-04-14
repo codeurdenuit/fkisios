@@ -84,9 +84,9 @@ export default class Player extends Object3D {
   }
 
   updatePhysic() {
-    const attack = this.ctrl.attack
-    let x = attack ? 0 : this.ctrl.x * SPEED
-    let z = attack ? 0 : this.ctrl.z * SPEED
+    const action = this.ctrl.attack||this.ctrl.lock
+    let x = action ? 0 : this.ctrl.x * SPEED
+    let z = action ? 0 : this.ctrl.z * SPEED
     let y = this.rigidBody.linvel().y
     this.rigidBody.setLinvel({ x, y, z }, true)
   }
@@ -123,16 +123,16 @@ export default class Player extends Object3D {
   }
 
   syncAnimSound() {
-    this.animator.onHalf(ATTACK, () => {
+    this.animator.on(ATTACK, 'half', () => {
       this.sound.play(YELL)
     })
-    this.animator.onEnd(RUN, () => {
+    this.animator.on(RUN, 'loop', () => {
       this.sound.play(STEP_R[this.ground])
     })
-    this.animator.onHalf(RUN, () => {
+    this.animator.on(RUN, 'half', () => {
       this.sound.play(STEP_L[this.ground])
     })
-    this.animator.onStart(SHIELD, () => {
+    this.animator.on(SHIELD, 'start', () => {
       this.sound.play(WARD)
     })
   }

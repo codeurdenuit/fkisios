@@ -107,16 +107,16 @@ export default class Player extends Object3D {
   }
 
   syncAnimSound() {
-    this.animator.onHalf(ATTACK, () => {
+    this.animator.on(ATTACK, 'half', () => {
       this.sound.play(YELL)
     })
-    this.animator.onEnd(RUN, () => {
+    this.animator.on(RUN, 'loop', () => {
       this.sound.play(DIRT_R)
     })
-    this.animator.onHalf(RUN, () => {
+    this.animator.on(RUN, 'half', () => {
       this.sound.play(DIRT_L)
     })
-    this.animator.onStart(SHIELD, () => {
+    this.animator.on(SHIELD, 'start', () => {
       this.sound.play(WARD)
     })
   }
