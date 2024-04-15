@@ -27,7 +27,6 @@ export default class Player extends Object3D {
 
   constructor(mesh, physic) {
     super()
-    const origin = new Vector3(0, 4, 0)
     this.animator = new Animator(mesh)
     this.initPhysic(physic, origin)
     this.initVisual(mesh)
@@ -36,7 +35,8 @@ export default class Player extends Object3D {
     this.syncAnimSound()
   }
 
-  initPhysic(physic, origin) {
+  initPhysic(physic) {
+    const origin = new Vector3(0, 4, 0)
     const { rigidBody, collider } = createRigidBodyEntity(origin, physic)
     this.rigidBody = rigidBody
     this.collider = collider

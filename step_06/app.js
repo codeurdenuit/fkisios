@@ -7,7 +7,7 @@ import Player from './entity/player'
 import { loadWorld, loadEntity } from './tool/loader'
 import physic from './engine/physic'
 
-const assetW = await loadWorld('./glb/world1.glb')
+const assetW = await loadWorld('./glb/world2.glb')
 const assetP = await loadEntity('./glb/character.glb')
 
 const scene = new Scene()

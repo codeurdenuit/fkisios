@@ -2,7 +2,6 @@ import { getSrc, randomInt } from '../tool/function'
 
 export default class Sound {
   tracks = new Map()
-  current = null
 
   load(key) {
     const srcs = getSrc(key)
@@ -14,17 +13,10 @@ export default class Sound {
     this.tracks.set(key, track)
   }
 
-  play(key, volume = 1) {
-    this.stop()
+  play(key) {
     const track = this.tracks.get(key)
     const index = randomInt(track.length)
+    track[index].currentTime = 0
     track[index].play()
-    this.current = track[index]
-  }
-
-  stop() {
-    if (!this.current) return
-    this.current.pause()
-    this.current.currentTime = 0
   }
 }

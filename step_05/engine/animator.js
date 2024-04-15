@@ -1,7 +1,6 @@
 import { LoopOnce, AnimationMixer } from 'three'
 import { findByName } from '../tool/function'
-import overwrite from '../tool/overwrite'
-overwrite()
+import '../tool/overwrite'
 
 export default class Animator {
   animations = new Map()

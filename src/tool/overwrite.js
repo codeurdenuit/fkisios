@@ -1,8 +1,5 @@
 export default function overwrite(Mesh, AnimationMixer, AnimationClip, LoopOnce) {
 
-  Mesh.prototype.isRootName = function isRootName(name) {
-    return this.name.includes(name)
-  }
   //this Class is not directly accessible ! 
   //THREE.AnimationAction.prototype._updateTime  
   const mesh = new Mesh()
